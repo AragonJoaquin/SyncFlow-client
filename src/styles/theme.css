@@ -1,0 +1,124 @@
+:root {
+	--color-background: #f9fafb;
+	--color-foreground: #1f2937;
+	--color-card: #fff;
+	--color-card-foreground: #1f2937;
+	--color-shadow-card: #535353;
+	--color-primary: #4ce036;
+	--color-primary-hover: #3ec229;
+	--color-primary-foreground: #0a0a0a;
+	--color-secondary: #e5e7eb;
+	--color-secondary-foreground: #1f2937;
+	--color-border: #dadde1;
+	--color-input: #e5e7eb;
+	--color-input-text: #1f2937;
+	--color-error: #ef4444;
+	--color-cancel: #ef4444;
+	--color-link: #4ce036;
+	--color-link-hover: #3ec229;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-background: #1e1e1e;
+		--color-foreground: #f9fafb;
+		--color-card: #333;
+		--color-card-foreground: #f9fafb;
+		--color-shadow-card: #000;
+		--color-primary: #54f63b;
+		--color-primary-hover: #3fb32d;
+		--color-primary-foreground: #0a0a0a;
+		--color-secondary: #646464;
+		--color-secondary-foreground: #bebebe;
+		--color-border: #000;
+		--color-input: #000;
+		--color-input-text: #1e1e1e;
+		--color-error: #ef4444;
+		--color-cancel: #ef4444;
+		--color-link: #54f63b;
+		--color-link-hover: #48da31;
+	}
+}
+
+body {
+	background-color: var(--color-background);
+	color: var(--color-foreground);
+	height: 100vh;
+}
+
+.bg-background {
+	background-color: var(--color-background);
+}
+
+.bg-foreground {
+	background-color: var(--color-foreground);
+}
+
+.bg-card {
+	background-color: var(--color-card);
+}
+
+.bg-primary {
+	background-color: var(--color-primary);
+}
+
+.bg-secondary {
+	background-color: var(--color-secondary);
+}
+
+.text-input-text {
+	color: var(--color-input-text);
+}
+
+.text-foreground {
+	color: var(--color-foreground);
+}
+
+.text-card-foreground {
+	color: var(--color-card-foreground);
+}
+
+.text-primary {
+	color: var(--color-primary);
+}
+
+.text-primary-foreground {
+	color: var(--color-primary-foreground);
+}
+
+.text-secondary-foreground {
+	color: var(--color-secondary-foreground);
+}
+
+.text-error {
+	color: var(--color-error);
+}
+
+.text-link {
+	font-weight: bold;
+	color: var(--color-link);
+}
+
+.border-color {
+	border-color: var(--color-border);
+}
+
+.border-input {
+	border-color: var(--color-input);
+}
+
+.bg-cancel {
+	background-color: var(--color-cancel);
+}
+
+.shadow-card {
+	box-shadow: 0 0 40px 2px var(--color-shadow-card);
+}
+
+.hover\:bg-primary-hover:hover {
+	background-color: var(--color-primary-hover);
+}
+
+.hover\:text-link-hover:hover {
+	color: var(--color-link-hover);
+}

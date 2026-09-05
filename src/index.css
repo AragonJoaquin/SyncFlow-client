@@ -1,0 +1,144 @@
+@import 'tailwindcss';
+@import './styles/theme.css';
+
+/* NOTE: OPEN_SANS FONT*/
+@font-face {
+	font-family: 'OpenSans';
+	src: url('/fonts/OpenSans-Light.woff2') format('woff2');
+	font-weight: 300;
+}
+
+@font-face {
+	font-family: 'OpenSans';
+	src: url('/fonts/OpenSans-Regular.woff2') format('woff2');
+	font-weight: 400 500; /* 400 through 500 its fine*/
+}
+
+@font-face {
+	font-family: 'OpenSans';
+	src: url('/fonts/OpenSans-SemiBold.woff2') format('woff2');
+	font-weight: 600;
+}
+
+@font-face {
+	font-family: 'OpenSans';
+	src: url('/fonts/OpenSans-Bold.woff2') format('woff2');
+	font-weight: 700;
+}
+
+/* NOTE: CABIN FONT*/
+
+@font-face {
+	font-family: 'Cabin';
+	src: url('/fonts/Cabin-Regular.woff2') format('woff2');
+	font-weight: 400 500; /* 400 through 500 its fine*/
+}
+
+@font-face {
+	font-family: 'Cabin';
+	src: url('/fonts/Cabin-SemiBold.woff2') format('woff2');
+	font-weight: 600;
+}
+
+@theme {
+	--color-primaryText: #2fd32f;
+
+	--color-whiteText: #e0e0e0;
+
+	--color-darkBG: #2a2a2a;
+	--color-darkFG: #1e1e1e;
+
+	--color-dark1: #121212;
+
+	--color-unfocused: #b0b0b0;
+	--color-disabled: #707070;
+
+	/*NOTE: fonts*/
+	--font-OpenSans: 'OpenSans', monospace, system-ui, Avenir, Arial, sans-serif;
+	--font-Cabin: 'Cabin', monospace;
+
+	/*NOTE: keyframes*/
+	--animate-appear-from: appear-from 0.1s ease-out;
+	@keyframes appear-from {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+}
+
+:root {
+	line-height: 1.5;
+	font-weight: 400;
+
+	color-scheme: light dark;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes blob {
+	0% {
+		transform: translate(0px, 0px) scale(1);
+	}
+
+	33% {
+		transform: translate(30px, -50px) scale(1.1);
+	}
+
+	66% {
+		transform: translate(-20px, 20px) scale(0.9);
+	}
+
+	100% {
+		transform: translate(0px, 0px) scale(1);
+	}
+}
+
+.animate-blob {
+	animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+	animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+	animation-delay: 4s;
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-fade-in {
+	animation: fade-in 0.5s ease-out forwards;
+}
+
+@keyframes fade-out {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateX(100%);
+	}
+}
+
+.animate-fade-out {
+	animation: fade-out 0.3s ease-out forwards;
+}
