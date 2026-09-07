@@ -12,7 +12,7 @@ export default defineConfig({
 
 	resolve: {
 		alias: {
-			"@": root(),
+			'@': root()
 			// "@api": root("/api"),
 			// "@store": root("/store"),
 			// "@comp": root("/components")
