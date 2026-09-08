@@ -101,7 +101,7 @@ export function EditableAvatar({ user, onAvatarUpdate }: EditableAvatarProps) {
 					>
 						<Avatar.Root>
 							<Avatar.Image
-								src={user.profile_picture}
+								src={user.profile_picture?.id}
 								alt={avatar_name}
 								title={avatar_name}
 								className="w-64 h-64 rounded-full"

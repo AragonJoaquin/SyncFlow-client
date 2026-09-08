@@ -84,7 +84,7 @@ export function PinnedMessagesPanel() {
 								className="w-full p-3 rounded-lg bg-neutral-800/50 border border-neutral-700/40 hover:bg-neutral-700/50 transition-colors cursor-pointer text-left"
 							>
 								<div className="flex items-start gap-2.5">
-									<SFAvatarImage src={msg.sender_picture} username={msg.sender_name} size="small" />
+									<SFAvatarImage src={undefined} username={msg.sender_name} size="small" />
 									<div className="flex-1 min-w-0">
 										<div className="flex items-center justify-between gap-2">
 											<span className="text-sm font-semibold font-OpenSans text-whiteText truncate">
