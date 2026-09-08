@@ -2,7 +2,7 @@ import { useAxios } from '@/api'
 import { ErrorServer } from '@/api/axios_helper'
 import { TextInput } from '@/components/input/text-input'
 import { useOwnUserStore, useToastStore } from '@/store'
-import type { UserWithJWT } from '@/types'
+import type { User } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Form from '@radix-ui/react-form'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
@@ -37,12 +37,12 @@ export function LoginForm() {
 			const user_or_email = data[FIELD_NAMES.USERNAME_OR_EMAIL]
 			const itsEmail = z.email().safeParse(user_or_email)
 
-			const { data: res } = await post<UserWithJWT>('/login', {
+			const { data: res } = await post<User>('/login', {
 				password: data[FIELD_NAMES.PASSWORD],
 				...(itsEmail.success ? { email: user_or_email } : { name: user_or_email })
 			})
 
-			login({ user: res.data?.user, token: res.data.jwt_token })
+			login({ user: res.data })
 			navigate('/')
 		} catch (err: unknown) {
 			err instanceof ErrorServer ? addErrToast(err) : addErrToast()

@@ -8,7 +8,7 @@ import { GLOBAL_CONTEXT } from './globalContext.ts'
 
 export function GlobalProvider({ children }: { children: ReactNode }) {
 	const { get } = useAxios()
-	const { token, setUser } = useOwnUserStore(useShallow((s) => ({ token: s.token, setUser: s.setUser })))
+	const { setUser } = useOwnUserStore(useShallow((s) => ({ setUser: s.setUser })))
 
 	const [isPending, setIsPending] = useState<boolean>(false)
 
@@ -16,7 +16,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 	//const [theme, setTheme] = useState<"light" | "dark">("dark")
 
 	useEffect(() => {
-		if (!token && isPending) return
+		if (isPending) return
 
 		setIsPending(true)
 		get<User>('/user/get_own')

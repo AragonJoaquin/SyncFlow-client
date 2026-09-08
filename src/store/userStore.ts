@@ -1,36 +1,24 @@
 import type { GroupMemberWithProfile, User, UUIDv4 } from '@/types'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { STORES_NAMES, useWorkGroupStore } from '.'
+import { useWorkGroupStore } from '.'
 
 interface UserStore {
 	user: User | null
-	token: string | null
 
-	login: ({ user, token }: { user: User; token: string }) => void
+	login: ({ user }: { user: User }) => void
 	setUser: (u: User) => void
 	logout: () => void
 }
 
 //NOTE: this store can be merged with the cacheUsers...
-export const useOwnUserStore = create<UserStore>()(
-	persist(
-		(set, _) => ({
-			user: null,
-			token: null,
+export const useOwnUserStore = create<UserStore>()((set, _) => ({
+	user: null,
 
-			login: ({ user, token }) => set({ user, token }),
-			logout: () => set({ user: null, token: null }),
+	login: ({ user }) => set({ user }),
+	logout: () => set({ user: null }),
 
-			setUser: (u) => set((prev) => ({ ...prev, user: u }))
-		}),
-		{
-			name: STORES_NAMES.USER_STORE,
-			//NOTE: we only want to persist the token
-			partialize: (state) => ({ token: state?.token })
-		}
-	)
-)
+	setUser: (u) => set((prev) => ({ ...prev, user: u }))
+}))
 
 interface CacheUsersStore {
 	users: Map<UUIDv4, GroupMemberWithProfile>

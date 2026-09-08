@@ -1,11 +1,10 @@
 import { ChatWebSocket } from '@/api'
-import { useOwnUserStore, useToastStore } from '@/store'
+import { useToastStore } from '@/store'
 import { useEffect, useRef, useState } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
 
 export function useWebsocket() {
-	const token = useOwnUserStore(useShallow((s) => s.token))!
 	const WS_MAPPED_ACTIONS = useWebsocketActions()
 
 	const { addErrorToast } = useToastStore(
@@ -18,9 +17,8 @@ export function useWebsocket() {
 	const RECONNECT_ATTEMPTS = useRef<number>(0)
 
 	useEffect(() => {
-		if (!token) throw new Error('No token specified')
-		setSocket(new ChatWebSocket(token, {}))
-	}, [token])
+		setSocket(new ChatWebSocket({}))
+	}, [])
 
 	useEffect(() => {
 		if (!socket) return
@@ -32,7 +30,7 @@ export function useWebsocket() {
 			if (RECONNECT_ATTEMPTS.current > socket.websocketOpts.RECONNECT_ATTEMPTS) return
 			setTimeout(() => {
 				console.log('reconnecting:')
-				setSocket(new ChatWebSocket(token, {}))
+				setSocket(new ChatWebSocket({}))
 				RECONNECT_ATTEMPTS.current++
 			}, socket.websocketOpts.RECONNECT_MS)
 		})

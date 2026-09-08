@@ -14,8 +14,7 @@ export type websocketOpts = Partial<typeof websocketDefaultOpts>
 
 const websocketDefaultOpts = {
 	RECONNECT_MS: 3000,
-	RECONNECT_ATTEMPTS: Infinity,
-	SEND_TOKEN_ON_OPEN: true
+	RECONNECT_ATTEMPTS: Infinity
 } as const
 
 export type IWSQueryStruct<T> = IQueryStruct<T> & { ws_handler: ws_actions }
@@ -41,21 +40,10 @@ export class ChatWebSocket {
 	public socket: WebSocket
 	public websocketOpts = websocketDefaultOpts
 
-	constructor(token: string | null, opts?: websocketOpts) {
+	constructor(opts?: websocketOpts) {
 		console.warn('Creating a new instance')
 		this.socket = createWS()
 		this.websocketOpts = { ...this.websocketOpts, ...opts }
-		if (opts?.SEND_TOKEN_ON_OPEN) return
-
-		//this makes impossible to use the onOpen method. but whos going to use it anyways
-		// make a pr if you REALLY need this (we can skip the token with the opts anyways lmao)
-		this.onOpen(() => {
-			this.socket.send(
-				JSON.stringify({
-					jwt_token: token
-				})
-			)
-		})
 	}
 
 	sendPayload<T>(action: ws_client_message<T>['action'], payload: ws_client_message<T>['payload']) {

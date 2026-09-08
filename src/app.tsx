@@ -8,29 +8,29 @@ import { NotFoundPage } from './pages/not-found'
 import { useOwnUserStore } from './store'
 
 export default function App() {
-  const token = useOwnUserStore(useShallow((s) => s.token))
+	const user = useOwnUserStore(useShallow((s) => s.user))
 
-  return (
-    <main className="min-h-screen h-screen w-full bg-darkBG font-OpenSans text-whiteText">
-      <Switch>
-        <Route
-          path="/"
-          component={() =>
-            token ? (
-              <ChatProvider>
-                <ChatPage />
-              </ChatProvider>
-            ) : (
-              <Redirect to="/auth" />
-            )
-          }
-        />
-        <Route path="/auth" component={() => (token ? <Redirect to="/" /> : <AuthPage />)} />
+	return (
+		<main className="min-h-screen h-screen w-full bg-darkBG font-OpenSans text-whiteText">
+			<Switch>
+				<Route
+					path="/"
+					component={() =>
+						user ? (
+							<ChatProvider>
+								<ChatPage />
+							</ChatProvider>
+						) : (
+							<Redirect to="/auth" />
+						)
+					}
+				/>
+				<Route path="/auth" component={() => (user ? <Redirect to="/" /> : <AuthPage />)} />
 
-        <Route component={NotFoundPage} />
-      </Switch>
+				<Route component={NotFoundPage} />
+			</Switch>
 
-      <SFToastRoot />
-    </main>
-  )
+			<SFToastRoot />
+		</main>
+	)
 }
