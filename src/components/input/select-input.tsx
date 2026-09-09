@@ -30,7 +30,7 @@ export function SelectInputField({ inputName, values, defaultVal }: ISelectInput
 					defaultValue={defaultVal ?? Object.keys(values).at(0)}
 				>
 					<Select.Trigger asChild>
-						<SFButton styling="secondary" className="text-base!  flex justify-center gap-2 ">
+						<SFButton styling="secondary" className="text-base! flex justify-center gap-2 ">
 							<Select.Value className={InputLabelStyles} placeholder="Pick an option" />
 							<Select.Icon>
 								<SVGChevronArrow />

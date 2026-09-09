@@ -20,7 +20,7 @@ export function ProfileDisplay({ user, onEdit, onStatusChange }: ProfileDisplayP
 	return (
 		<article className="flex flex-col gap-3">
 			<header className="flex items-start gap-3">
-				<span className="shrink-0 relative overflow-hidden *:last:opacity-0 hover:*:last:opacity-100 *:transition-all">
+				<span className="shrink-0 relative overflow-hidden *:last:opacity-0 hover:*:last:opacity-100 *:transition-opacity">
 					<SFAvatarImage src={user.profile_picture} username={user.name} />
 					<div className="absolute w-full h-full inset-0 bg-neutral-900/20 rounded-4xl">
 						<SVGPen className="w-6 h-6 absolute top-1/2 left-1/2 -translate-1/2" />

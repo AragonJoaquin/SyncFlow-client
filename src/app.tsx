@@ -5,7 +5,7 @@ import { ChatProvider } from './context'
 import { AuthPage } from './pages/auth'
 import { ChatPage } from './pages/chats/chats'
 import { NotFoundPage } from './pages/not-found'
-import { useOwnUserStore } from './store'
+import { useOwnUserStore } from './store/userStore'
 
 export default function App() {
 	const user = useOwnUserStore(useShallow((s) => s.user))

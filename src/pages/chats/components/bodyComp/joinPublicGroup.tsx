@@ -23,11 +23,14 @@ export function FormPublicGroup() {
 
 	const inputRef = useRef<HTMLInputElement>({} as HTMLInputElement)
 
-	const debouncedSetInput = useRef(
-		debouncer((value: string) => {
+	const debouncedSetInput = useRef<(v: string) => void | null>(null)
+
+	// lazily initialize
+	if (!debouncedSetInput.current) {
+		debouncedSetInput.current = debouncer((value: string) => {
 			setFieldInput(value)
 		}, 300)
-	).current
+	}
 
 	const addWorkGroup = useWorkGroupStore((s) => s.addWorkGroup)
 
@@ -41,15 +44,18 @@ export function FormPublicGroup() {
 		}
 	}, [hasMore, isPending])
 
-	const joinGroup = useCallback(async (groupId: number) => {
-		try {
-			const { data: response } = await post<FullWorkGroup>(`/work_group/${groupId}`)
-			addWorkGroup(response.data)
-			addSuccessToast('Successfully joined the group!')
-		} catch (e) {
-			e instanceof ErrorServer ? addErrorToast(e) : addErrorToast()
-		}
-	}, [addWorkGroup, post, addSuccessToast, addErrorToast])
+	const joinGroup = useCallback(
+		async (groupId: number) => {
+			try {
+				const { data: response } = await post<FullWorkGroup>(`/work_group/${groupId}`)
+				addWorkGroup(response.data)
+				addSuccessToast('Successfully joined the group!')
+			} catch (e) {
+				e instanceof ErrorServer ? addErrorToast(e) : addErrorToast()
+			}
+		},
+		[addWorkGroup, post, addSuccessToast, addErrorToast]
+	)
 
 	useEffect(() => {
 		if (!inputRef.current || fieldInput.length < MIN_INPUT_LENGTH) return

@@ -73,7 +73,9 @@ export function CreateChannelModal() {
 					/>
 
 					<span className="flex flex-col">
-						<label className="block text-xs sm:text-sm font-semibold font-Cabin text-foreground mb-1.5">Category</label>
+						<label htmlFor="" className="block text-xs sm:text-sm font-semibold font-Cabin text-foreground mb-1.5">
+							Category
+						</label>
 
 						<SelectInputField
 							inputName={FIELD_NAMES.CATEGORY_ID}

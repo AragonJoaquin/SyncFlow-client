@@ -80,9 +80,12 @@ export function FooterChat() {
 				onSubmit={handleSubmit(onSubmit)}
 			>
 				{errorsArray.length > 0 &&
-					errorsArray.map(([_, value]) => {
+					errorsArray.map(([id, value]) => {
 						return (
-							<h4 className="text-red-600 bg-red-500/20 px-2 py-1 rounded absolute top-0 left-0 -translate-y-[calc(100%+1.5ch)]">
+							<h4
+								className="text-red-600 bg-red-500/20 px-2 py-1 rounded absolute top-0 left-0 -translate-y-[calc(100%+1.5ch)]"
+								key={id}
+							>
 								{value?.message ?? 'Unknown'}
 							</h4>
 						)

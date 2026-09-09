@@ -1,4 +1,3 @@
-import { useAxios } from '@/api'
 import { SFButton } from '@/components'
 import { Textarea, TextInput } from '@/components/input'
 import type { User } from '@/types'
@@ -11,6 +10,9 @@ const FIELD_NAMES = {
 	ALIAS_NAME: 'alias_name',
 	DESCRIPTION: 'description'
 } as const
+
+//TODO: finish
+const onSubmit: SubmitHandler<ProfileEditFormData> = () => {}
 
 const schema = z.object({
 	[FIELD_NAMES.ALIAS_NAME]: z.string().min(3, 'Username should be at least 3 characters.'),
@@ -34,9 +36,7 @@ export function ProfileEditForm({ user, onCancel }: ProfileEditFormProps) {
 		}
 	})
 
-	const {} = useAxios()
-
-	const onSubmit: SubmitHandler<ProfileEditFormData> = () => {}
+	//const {} = useAxios()
 
 	return (
 		<FormProvider {...{ handleSubmit, ...methods }}>

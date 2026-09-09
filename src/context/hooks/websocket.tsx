@@ -1,8 +1,8 @@
-import { ChatWebSocket } from '@/api'
 import { useToastStore } from '@/store'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
+import { useGetWebsocketInstance } from './useGetWebsocketInstance'
 
 export function useWebsocket() {
 	const WS_MAPPED_ACTIONS = useWebsocketActions()
@@ -13,12 +13,7 @@ export function useWebsocket() {
 		}))
 	)
 
-	const [socket, setSocket] = useState<ChatWebSocket>()
-	const RECONNECT_ATTEMPTS = useRef<number>(0)
-
-	useEffect(() => {
-		setSocket(new ChatWebSocket({}))
-	}, [])
+	const { chatWS: socket } = useGetWebsocketInstance()
 
 	useEffect(() => {
 		if (!socket) return
@@ -26,13 +21,6 @@ export function useWebsocket() {
 		//reconnect attempt, attempt
 		socket.onClose((close) => {
 			console.warn('Socket closed: ', close)
-
-			if (RECONNECT_ATTEMPTS.current > socket.websocketOpts.RECONNECT_ATTEMPTS) return
-			setTimeout(() => {
-				console.log('reconnecting:')
-				setSocket(new ChatWebSocket({}))
-				RECONNECT_ATTEMPTS.current++
-			}, socket.websocketOpts.RECONNECT_MS)
 		})
 
 		//socket error'ed

@@ -25,12 +25,15 @@ export function Body() {
 
 	useEffect(() => {
 		if (!messages.length) return
-		setTimeout(() => {
+
+		const timeid = setTimeout(() => {
 			containerRef.current?.scrollTo({
 				top: containerRef.current?.scrollHeight,
 				behavior: 'instant'
 			})
 		}, 0)
+
+		return () => clearTimeout(timeid)
 	}, [messages])
 
 	const { getUser } = useCacheUsersStore(

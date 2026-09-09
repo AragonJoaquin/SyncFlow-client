@@ -49,9 +49,10 @@ export function AsideBar() {
 			</SFButton>
 
 			<div
-				//make the transition work lol
+				//TODO: make the transition work lol
 				className={`fixed ${!isMobileOpen ? 'hidden opacity-0' : 'opacity-100'} bg-black/50 h-full w-full transition-all duration-200 z-99`}
 				onClick={() => setIsMobileOpen(false)}
+				// onKeyUp={() => setIsMobileOpen(false)}
 			/>
 
 			<div

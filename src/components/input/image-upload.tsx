@@ -45,6 +45,7 @@ export const ImageUploader = ({ fieldName, label }: ImageUploaderProps) => {
 			<Form.Label className={`${InputLabelStyles} text-center`}>{label}</Form.Label>
 
 			<div
+				role="button"
 				onDragOver={(e) => {
 					e.preventDefault()
 					setIsDragging(true)

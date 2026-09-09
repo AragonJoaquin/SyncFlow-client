@@ -39,11 +39,17 @@ export const WS_ACTIONS = {
 export class ChatWebSocket {
 	public socket: WebSocket
 	public websocketOpts = websocketDefaultOpts
+	private listeners = new Set<() => void>()
 
 	constructor(opts?: websocketOpts) {
 		console.warn('Creating a new instance')
 		this.socket = createWS()
 		this.websocketOpts = { ...this.websocketOpts, ...opts }
+
+		// notify subscribers when connection state changes
+		this.socket.addEventListener('open', this.notify)
+		this.socket.addEventListener('close', this.notify)
+		this.socket.addEventListener('error', this.notify)
 	}
 
 	sendPayload<T>(action: ws_client_message<T>['action'], payload: ws_client_message<T>['payload']) {
@@ -59,6 +65,9 @@ export class ChatWebSocket {
 
 	//NOTE: listener wrappers
 	onClose = (f: (ev: CloseEvent) => void) => {
+		this.socket.removeEventListener('open', this.notify)
+		this.socket.removeEventListener('close', this.notify)
+		this.socket.removeEventListener('error', this.notify)
 		this.socket.onclose = (e) => f(e)
 	}
 
@@ -83,4 +92,13 @@ export class ChatWebSocket {
 			f({ ...e, data: data })
 		}
 	}
+
+	//WARN: store subscription API react
+	subscribe = (listener: () => void) => {
+		this.listeners.add(listener)
+		return () => this.listeners.delete(listener)
+	}
+
+	getSnapshot = () => this.socket.readyState
+	private notify = () => this.listeners.forEach((listener) => listener())
 }

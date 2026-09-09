@@ -26,16 +26,18 @@ export function AsideChatBar() {
 	//	const { toggleIsMobileOpen } = useAsideBarContext()
 
 	const filteredCategories = useMemo(() => {
-		if (!searchQuery.trim()) return [...categories]
+		const entries = Array.from(categories.entries())
+		if (!searchQuery.trim()) return entries
+
 		const query = searchQuery.toLowerCase()
-		return [...categories]
-			.filter(([, category]) => {
-				return category.channel?.some((ch) => ch.name?.toLowerCase().includes(query))
-			})
-			.map(([catId, category]): [Category['id'], CategoryWithChannels] => {
-				const filteredChannels = category.channel?.filter((ch) => ch.name?.toLowerCase().includes(query))
-				return [catId, { ...category, channel: filteredChannels }]
-			})
+
+		return entries.reduce<[number, CategoryWithChannels][]>((acc, [catId, category]) => {
+			const filteredChannels = category.channel?.filter((ch) => ch.name?.toLowerCase().includes(query))
+
+			if (filteredChannels && filteredChannels.length > 0) acc.push([catId, { ...category, channel: filteredChannels }])
+
+			return acc
+		}, [])
 	}, [categories, searchQuery])
 
 	//NOTE: for the section translate, do gap/2

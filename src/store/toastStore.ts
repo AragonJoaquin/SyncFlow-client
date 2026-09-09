@@ -35,7 +35,7 @@ export const useToastStore = create<ToastStore>((set) => ({
 				...s.toasts,
 				{
 					...(t || UNKNOWN_TOAST_PROPS),
-					id: s.lastToastId++
+					id: s.lastToastId + 1
 				}
 			]
 		})),
@@ -60,7 +60,7 @@ export const useToastStore = create<ToastStore>((set) => ({
 				{
 					...toast,
 					variant: 'error',
-					id: s.lastToastId++
+					id: s.lastToastId + 1
 				}
 			]
 		}))
@@ -78,7 +78,7 @@ export const useToastStore = create<ToastStore>((set) => ({
 				...s.toasts,
 				{
 					...toast,
-					id: s.lastToastId++
+					id: s.lastToastId + 1
 				}
 			]
 		}))

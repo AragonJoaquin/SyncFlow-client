@@ -1,6 +1,6 @@
 import { useAnyContext } from '@/context'
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { createContext, useCallback, type ReactNode } from 'react'
+import { createContext, useCallback, useMemo, type ReactNode } from 'react'
 import { AXIOS_METHODS, type axios_data, type axios_route, type IQueryStruct } from './axios_helper'
 import { useAxiosInternalFetch } from './axiosInstance'
 
@@ -35,46 +35,45 @@ export function AxiosProvider({ children }: { children: ReactNode }) {
 	const axiosGet = useCallback(
 		async <T extends any>(route: axios_route, conf?: AxiosRequestConfig<any>) =>
 			await axios_fetch<T>(route, undefined, AXIOS_METHODS.GET, conf),
-		[]
+		[axios_fetch]
 	)
 
 	const axiosPost = useCallback(
 		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.POST, conf),
-		[]
+		[axios_fetch]
 	)
 
 	const axiosPatch = useCallback(
 		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.PATCH, conf),
-		[]
+		[axios_fetch]
 	)
 
 	const axiosPut = useCallback(
 		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.PUT, conf),
-		[]
+		[axios_fetch]
 	)
 
 	const axiosDelete = useCallback(
 		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.DELETE, conf),
-		[]
+		[axios_fetch]
 	)
 
-	return (
-		<AXIOS_CONTEXT.Provider
-			value={{
-				get: axiosGet,
-				delete: axiosDelete,
-				patch: axiosPatch,
-				post: axiosPost,
-				put: axiosPut
-			}}
-		>
-			{children}
-		</AXIOS_CONTEXT.Provider>
+	const contextValue = useMemo(
+		() => ({
+			get: axiosGet,
+			delete: axiosDelete,
+			patch: axiosPatch,
+			post: axiosPost,
+			put: axiosPut
+		}),
+		[axiosGet, axiosDelete, axiosPatch, axiosPost, axiosPut]
 	)
+
+	return <AXIOS_CONTEXT.Provider value={contextValue}>{children}</AXIOS_CONTEXT.Provider>
 }
 
 //NOTE: it should say "useAxiosContext"... but i prefer this way... to keep the abstraction simple
