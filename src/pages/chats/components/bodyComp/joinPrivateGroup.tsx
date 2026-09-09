@@ -28,20 +28,16 @@ export function FormPrivateGroup() {
 
 	const { get } = useAxios()
 	const addSuccessToast = useToastStore(useShallow((s) => s.addSuccessToast))
-	const addErrorToast = useToastStore(useShallow((s) => s.addErrorToast))
 
 	const onSubmit: SubmitHandler<z.infer<typeof zodSchema>> = async (e) => {
-		try {
-			const group_uuid = e[FIELD_NAMES.GROUP_UUID] ?? null
+		const group_uuid = e[FIELD_NAMES.GROUP_UUID] ?? null
 
-			if (!group_uuid) throw new Error()
-			const { data: response } = await get<FullWorkGroup>(`/invite/${group_uuid}`)
+		if (!group_uuid) return
+		const { data: response } = await get<FullWorkGroup>(`/invite/${group_uuid}`)
+		if (response.error) return
 
-			addWorkGroup(response.data)
-			addSuccessToast('You have successfully joined the group.')
-		} catch {
-			addErrorToast({ title: 'Failed', description: 'Could not join the group. Check the UUID and try again.' })
-		}
+		addWorkGroup(response.data)
+		addSuccessToast('You have successfully joined the group.')
 	}
 
 	return (

@@ -1,5 +1,4 @@
 import { useAxios } from '@/api'
-import type { ErrorServer } from '@/api/axios_helper.ts'
 import { useOwnUserStore } from '@/store/userStore.ts'
 import type { User } from '@/types'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -21,14 +20,11 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 		setIsPending(true)
 		get<User>('/user/get_own')
 			.then(({ data: res }) => {
-				if (res?.data == null) return
+				if (res.error) return
 				setUser(res.data)
 			})
-			.catch((error: ErrorServer) => {
-				console.error('could not get the own user information: ', error)
-			})
 			.finally(() => setIsPending(false))
-	}, [false])
+	}, [])
 
 	return (
 		<GLOBAL_CONTEXT.Provider

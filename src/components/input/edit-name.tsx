@@ -4,7 +4,6 @@ import { z } from 'zod'
 import * as Form from '@radix-ui/react-form'
 import { TextInput } from './text-input'
 import { useAxios } from '@/api'
-import { ErrorServer } from '@/api/axios_helper'
 import { useOwnUserStore, useToastStore } from '@/store'
 import type { User } from '@/types'
 
@@ -14,11 +13,20 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-export function EditName({ value, inputName, formId, close }: { value: string; inputName: string; formId: string; close?: () => void }) {
+export function EditName({
+	value,
+	inputName,
+	formId,
+	close
+}: {
+	value: string
+	inputName: string
+	formId: string
+	close?: () => void
+}) {
 	const { patch } = useAxios()
 	const setUser = useOwnUserStore((s) => s.setUser)
 	const addSuccessToast = useToastStore((s) => s.addSuccessToast)
-	const addErrorToast = useToastStore((s) => s.addErrorToast)
 
 	const methods = useForm<FormData>({
 		resolver: zodResolver(schema),
@@ -26,14 +34,12 @@ export function EditName({ value, inputName, formId, close }: { value: string; i
 	})
 
 	const onSubmit: SubmitHandler<FormData> = async (data) => {
-		try {
-			const { data: res } = await patch<User>('/user', { name: data.name })
-			setUser(res.data)
-			addSuccessToast('Nombre actualizado correctamente')
-			close?.()
-		} catch (err) {
-			err instanceof ErrorServer ? addErrorToast(err) : addErrorToast()
-		}
+		const { data: res } = await patch<User>('/user', { name: data.name })
+		if (res.error) return
+
+		setUser(res.data)
+		addSuccessToast('Nombre actualizado correctamente')
+		close?.()
 	}
 
 	return (
@@ -43,12 +49,7 @@ export function EditName({ value, inputName, formId, close }: { value: string; i
 				<h4 className="pb-5">
 					Nombre actual: <span className="font-bold">{value}</span>
 				</h4>
-				<TextInput
-					type="text"
-					label="Nuevo nombre"
-					placeholder="nombre"
-					inputName={inputName}
-				/>
+				<TextInput type="text" label="Nuevo nombre" placeholder="nombre" inputName={inputName} />
 			</Form.Root>
 		</FormProvider>
 	)

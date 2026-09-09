@@ -22,7 +22,7 @@ export const debouncer = <T extends unknown[]>(callback: (...args: T) => void, d
 	}
 }
 
-export const BASE_URL: string = import.meta.env.DEV ? 'http://localhost:8080/v1' : import.meta.env.VITE_API_URL
+export const BASE_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api'
 export const CLIENT_VER: string = import.meta.env.VITE_CLIENT_VER ?? '???'
 
 export const INVALID_DATE = '0001-01-01T00:00:00Z' as const

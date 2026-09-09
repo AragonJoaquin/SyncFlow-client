@@ -5,7 +5,7 @@ import { useWorkGroupStore } from '.'
 interface UserStore {
 	user: User | null
 
-	login: ({ user }: { user: User }) => void
+	login: (user: User) => void
 	setUser: (u: User) => void
 	logout: () => void
 }
@@ -14,7 +14,7 @@ interface UserStore {
 export const useOwnUserStore = create<UserStore>()((set, _) => ({
 	user: null,
 
-	login: ({ user }) => set({ user }),
+	login: (user) => set({ user }),
 	logout: () => set({ user: null }),
 
 	setUser: (u) => set((prev) => ({ ...prev, user: u }))

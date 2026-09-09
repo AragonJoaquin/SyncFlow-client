@@ -1,8 +1,7 @@
 import { useAxios } from '@/api'
-import { ErrorServer } from '@/api/axios_helper'
 import { SFButton } from '@/components'
 import { ImageUploader, SelectInputField, TextInput } from '@/components/input'
-import { useToastStore, useWorkGroupStore } from '@/store'
+import { useWorkGroupStore } from '@/store'
 import type { FullWorkGroup } from '@/types'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -46,23 +45,19 @@ export function CreateGroupForm() {
 	const addWK = useWorkGroupStore((s) => s.addWorkGroup)
 
 	const { post } = useAxios()
-	const addErrToast = useToastStore((s) => s.addErrorToast)
 	const onSubmit = async (e: CreateGroupType) => {
 		const file = e[FIELD_NAMES.PICTURE]
 
-		try {
-			const formData = new FormData()
+		const formData = new FormData()
 
-			for (const k in e)
-				(k as (typeof FIELD_NAMES)[keyof typeof FIELD_NAMES]) === FIELD_NAMES.PICTURE
-					? formData.append(k, file ? file?.slice() : new Blob())
-					: formData.append(k, e[k as keyof Omit<typeof e, typeof FIELD_NAMES.PICTURE>] as string)
+		for (const k in e)
+			(k as (typeof FIELD_NAMES)[keyof typeof FIELD_NAMES]) === FIELD_NAMES.PICTURE
+				? formData.append(k, file ? file?.slice() : new Blob())
+				: formData.append(k, e[k as keyof Omit<typeof e, typeof FIELD_NAMES.PICTURE>] as string)
 
-			const { data: res } = await post<FullWorkGroup>('/work_group', formData)
-			addWK(res.data)
-		} catch (e) {
-			e instanceof ErrorServer ? addErrToast(e) : addErrToast()
-		}
+		const { data: res } = await post<FullWorkGroup>('/work_group', formData)
+		if (res.error) return
+		addWK(res.data)
 	}
 
 	return (

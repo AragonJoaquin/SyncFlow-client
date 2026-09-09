@@ -1,7 +1,6 @@
 import { useAxios } from '@/api'
-import { ErrorServer } from '@/api/axios_helper'
 import { TextInput } from '@/components/input'
-import { useOwnUserStore, useToastStore } from '@/store'
+import { useOwnUserStore } from '@/store'
 import type { User } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Form from '@radix-ui/react-form'
@@ -37,18 +36,14 @@ export function RegisterForm() {
 
 	const [, navigate] = useLocation()
 	const { login } = useOwnUserStore()
-	const addErrToast = useToastStore((s) => s.addErrorToast)
 	const { post } = useAxios()
 
 	const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
-		try {
-			const { data: res } = await post<User>('/signin', data)
+		const { data: res } = await post<User>('/signin', data)
+		if (res.error) return
 
-			login({ user: res.data })
-			navigate('/')
-		} catch (err: unknown) {
-			err instanceof ErrorServer ? addErrToast(err) : addErrToast()
-		}
+		login(res.data)
+		navigate('/')
 	}
 
 	return (

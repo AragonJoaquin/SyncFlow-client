@@ -48,7 +48,8 @@ export type axios_data = Record<string, unknown> | FormData
 export type axios_route = `/${string}`
 
 export const AXIOS_INSTANCE = axios.create({
-	baseURL: BASE_URL,
+	//TODO: this is going to be a problem later on. remove v1
+	baseURL: `${BASE_URL}/v1`,
 	timeout: 5000,
 	withCredentials: true
 })

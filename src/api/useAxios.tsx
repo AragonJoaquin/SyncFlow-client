@@ -1,20 +1,20 @@
 import { useAnyContext } from '@/context'
-import type { AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosRequestConfig } from 'axios'
 import { createContext, useCallback, useMemo, type ReactNode } from 'react'
-import { AXIOS_METHODS, type axios_data, type axios_route, type IQueryStruct } from './axios_helper'
-import { useAxiosInternalFetch } from './axiosInstance'
+import { AXIOS_METHODS, type axios_data, type axios_route } from './axios_helper'
+import { useAxiosInternalFetch, type return_axios_internal_fetch } from './axiosInstance'
 
 type returnFunc = <T extends any>(
 	route: axios_route,
 	data?: axios_data,
 	conf?: AxiosRequestConfig<any>
-) => Promise<AxiosResponse<IQueryStruct<T> & { error: false }, any, {}>>
+) => return_axios_internal_fetch<T>
 
 interface IAxios {
 	get: <T extends any>(
 		route: Parameters<returnFunc>['0'],
 		conf?: Parameters<returnFunc>['2']
-	) => Promise<AxiosResponse<IQueryStruct<T> & { error: false }, any, {}>>
+	) => return_axios_internal_fetch<T>
 	post: returnFunc
 	delete: returnFunc
 	put: returnFunc

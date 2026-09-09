@@ -37,7 +37,7 @@ export function EditableAvatar({ user, onAvatarUpdate }: EditableAvatarProps) {
 	const [isLoading, setIsLoading] = useState(false)
 	const { patch, post } = useAxios()
 	const { setUser } = useOwnUserStore()
-	const { addSuccessToast, addErrorToast } = useToastStore()
+	const { addSuccessToast } = useToastStore()
 
 	const methods = useForm<AvatarFormType>({
 		resolver: zodResolver(zodSchema),
@@ -57,25 +57,17 @@ export function EditableAvatar({ user, onAvatarUpdate }: EditableAvatarProps) {
 			formData.append('file', file)
 
 			const { data: res } = await post<{ url: string }>('/upload/public', formData)
+			if (res.error) return
+
 			const updateResponse = await patch<User>('/user', { profile_picture: res.data.url })
 
-			const updatedUser = updateResponse.data.data
+			const updUsr = updateResponse.data
+			if (updUsr.error) return
 
-			setUser(updatedUser)
-			onAvatarUpdate(updatedUser)
+			setUser(updUsr.data)
+			onAvatarUpdate(updUsr.data)
 			addSuccessToast('Profile picture updated successfully')
 			methods.reset()
-		} catch (error) {
-			if (error instanceof Error)
-				addErrorToast({
-					title: 'Upload failed',
-					description: error?.message ?? 'Failed to update profile picture'
-				})
-
-			addErrorToast({
-				title: 'Upload failed',
-				description: 'An unexpected error occurred'
-			})
 		} finally {
 			setIsLoading(false)
 		}

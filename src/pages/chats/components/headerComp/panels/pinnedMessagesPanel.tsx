@@ -1,9 +1,8 @@
 import { useAxios } from '@/api'
-import { ErrorServer } from '@/api/axios_helper'
 import { SFAvatarImage } from '@/components'
 import { SVGPin } from '@/components/svgs'
 import { SIDE_PANNELS_STATE } from '@/context/chatContext'
-import { useToastStore, useWorkGroupStore } from '@/store'
+import { useWorkGroupStore } from '@/store'
 import type { PinnedMessage } from '@/types'
 import { FormatRelativeTime } from '@/utils'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -22,25 +21,17 @@ export function PinnedMessagesPanel() {
 	)
 
 	const { get: getMethod } = useAxios()
-	const { addErrorToast } = useToastStore(
-		useShallow((s) => ({
-			addErrorToast: s.addErrorToast
-		}))
-	)
 
 	useEffect(() => {
 		if (!workGroup?.id) return
 
 		setIsLoading(true)
-		try {
-			getMethod<PinnedMessage[]>(`/work_group/${workGroup.id}/pinned-messages`, undefined).then(({ data: res }) =>
+		getMethod<PinnedMessage[]>(`/work_group/${workGroup.id}/pinned-messages`, undefined)
+			.then(({ data: res }) => {
+				if (res.error) return
 				setPinnedMessages(res?.data ?? [])
-			)
-		} catch (e) {
-			e instanceof ErrorServer ? addErrorToast(e) : addErrorToast()
-		} finally {
-			setIsLoading(false)
-		}
+			})
+			.finally(() => setIsLoading(false))
 	}, [workGroup?.id])
 
 	const setSearchInputVal = useCallback((val: string) => setSearch(val), [])

@@ -9,36 +9,51 @@ import {
 	type axios_route,
 	type IQueryStruct
 } from './axios_helper'
+import { useToastStore } from '@/store'
+
+export type return_axios_internal_fetch<T> = Promise<AxiosResponse<IQueryStruct<T>> | { data: { error: true } }>
 
 export function useAxiosInternalFetch() {
+	const errToast = useToastStore((s) => s.addErrorToast)
+
 	const axios_fetch = useCallback(
 		async <T>(
 			route: axios_route,
 			data: axios_data | undefined,
 			met: axios_avail_methods,
 			conf?: AxiosRequestConfig<any>
-		): Promise<AxiosResponse<IQueryStruct<T> & { error: false }>> => {
-			const res = await AXIOS_INSTANCE<IQueryStruct<T>>({
-				url: route,
-				method: met,
-				...(met !== AXIOS_METHODS.GET && data != undefined
-					? {
-							data,
-							headers: {
-								'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+		): return_axios_internal_fetch<T> => {
+			try {
+				const res = await AXIOS_INSTANCE<IQueryStruct<T>>({
+					url: route,
+					method: met,
+					...(met !== AXIOS_METHODS.GET && data != undefined
+						? {
+								data,
+								headers: {
+									'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+								}
 							}
-						}
-					: { headers: {} }),
-				...conf
-			})
+						: { headers: {} }),
+					...conf
+				})
 
-			if (!res || !res?.data || res.data.error === true) {
-				const { status, data } = res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
-				throw new ErrorServer(data?.data, status)
+				if (!res || !res?.data || res.data.error) {
+					const { status, data } = res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
+					errToast(new ErrorServer(data?.data, status))
+					return res
+				}
+
+				return res as AxiosResponse<Extract<IQueryStruct<T>, { error: false }>>
+			} catch (e: any) {
+				const status = e?.response?.status || 500
+				const errorData = e?.response?.data?.data || e?.message || 'Unexpected Error'
+
+				errToast(new ErrorServer(errorData, status))
+				return { data: { error: true } }
 			}
-			return res as AxiosResponse<Extract<IQueryStruct<T>, { error: false }>>
 		},
-		[]
+		[errToast]
 	)
 
 	return axios_fetch

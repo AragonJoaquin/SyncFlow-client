@@ -1,7 +1,6 @@
 import { useAxios } from '@/api'
-import { ErrorServer } from '@/api/axios_helper'
 import { TextInput } from '@/components/input/text-input'
-import { useOwnUserStore, useToastStore } from '@/store'
+import { useOwnUserStore } from '@/store'
 import type { User } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Form from '@radix-ui/react-form'
@@ -29,24 +28,21 @@ export function LoginForm() {
 	})
 
 	const { login } = useOwnUserStore()
-	const addErrToast = useToastStore((s) => s.addErrorToast)
 	const { post } = useAxios()
 
 	const onSubmit: SubmitHandler<FormData> = async (data) => {
-		try {
-			const user_or_email = data[FIELD_NAMES.USERNAME_OR_EMAIL]
-			const itsEmail = z.email().safeParse(user_or_email)
+		const user_or_email = data[FIELD_NAMES.USERNAME_OR_EMAIL]
+		const itsEmail = z.email().safeParse(user_or_email)
 
-			const { data: res } = await post<User>('/login', {
-				password: data[FIELD_NAMES.PASSWORD],
-				...(itsEmail.success ? { email: user_or_email } : { name: user_or_email })
-			})
+		const { data: res } = await post<User>('/login', {
+			password: data[FIELD_NAMES.PASSWORD],
+			...(itsEmail.success ? { email: user_or_email } : { name: user_or_email })
+		})
 
-			login({ user: res.data })
-			navigate('/')
-		} catch (err: unknown) {
-			err instanceof ErrorServer ? addErrToast(err) : addErrToast()
-		}
+		if (res.error) return
+
+		login(res.data)
+		navigate('/')
 	}
 
 	return (

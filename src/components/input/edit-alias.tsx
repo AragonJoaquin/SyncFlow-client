@@ -4,7 +4,6 @@ import { z } from 'zod'
 import * as Form from '@radix-ui/react-form'
 import { TextInput } from './text-input'
 import { useAxios } from '@/api'
-import { ErrorServer } from '@/api/axios_helper'
 import { useOwnUserStore, useToastStore } from '@/store'
 import type { User } from '@/types'
 
@@ -34,7 +33,6 @@ export function EditAlias({
 	const { patch } = useAxios()
 	const setUser = useOwnUserStore((s) => s.setUser)
 	const addSuccessToast = useToastStore((s) => s.addSuccessToast)
-	const addErrorToast = useToastStore((s) => s.addErrorToast)
 
 	const methods = useForm<FormData>({
 		resolver: zodResolver(schema),
@@ -48,19 +46,14 @@ export function EditAlias({
 			return
 		}
 
-		try {
-			const payload = { [inputName]: data.alias_name }
-			const { data: res } = await patch<User>('/user', payload)
-			setUser(res.data)
-			addSuccessToast('Alias updated successfully.')
-			close?.()
-		} catch (err) {
-			if (err instanceof ErrorServer) {
-				addErrorToast(err)
-			} else {
-				addErrorToast()
-			}
-		}
+		const payload = { [inputName]: data.alias_name }
+		const { data: res } = await patch<User>('/user', payload)
+
+		if (res.error) return
+
+		setUser(res.data)
+		addSuccessToast('Alias updated successfully.')
+		close?.()
 	}
 
 	return (

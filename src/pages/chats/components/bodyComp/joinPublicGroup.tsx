@@ -1,5 +1,4 @@
 import { useAxios } from '@/api'
-import { ErrorServer } from '@/api/axios_helper'
 import { SFButton, SFGroupCard, SFSkeleton } from '@/components'
 import { DumbInput } from '@/components/input'
 import { SVGChevronArrow } from '@/components/svgs'
@@ -23,20 +22,19 @@ export function FormPublicGroup() {
 
 	const inputRef = useRef<HTMLInputElement>({} as HTMLInputElement)
 
-	const debouncedSetInput = useRef<(v: string) => void | null>(null)
+	const debouncedSetInput = useRef<ReturnType<typeof debouncer> | null>(null)
 
 	// lazily initialize
 	if (!debouncedSetInput.current) {
 		debouncedSetInput.current = debouncer((value: string) => {
 			setFieldInput(value)
-		}, 300)
+		}, 300) as ReturnType<typeof debouncer>
 	}
 
 	const addWorkGroup = useWorkGroupStore((s) => s.addWorkGroup)
 
 	const { get, post } = useAxios()
 	const addSuccessToast = useToastStore(useShallow((s) => s.addSuccessToast))
-	const addErrorToast = useToastStore(useShallow((s) => s.addErrorToast))
 
 	const getMoreResults = useCallback(() => {
 		if (hasMore && !isPending) {
@@ -46,15 +44,13 @@ export function FormPublicGroup() {
 
 	const joinGroup = useCallback(
 		async (groupId: number) => {
-			try {
-				const { data: response } = await post<FullWorkGroup>(`/work_group/${groupId}`)
-				addWorkGroup(response.data)
-				addSuccessToast('Successfully joined the group!')
-			} catch (e) {
-				e instanceof ErrorServer ? addErrorToast(e) : addErrorToast()
-			}
+			const { data: response } = await post<FullWorkGroup>(`/work_group/${groupId}`)
+			if (response.error) return
+
+			addWorkGroup(response.data)
+			addSuccessToast('Successfully joined the group!')
 		},
-		[addWorkGroup, post, addSuccessToast, addErrorToast]
+		[addWorkGroup, post, addSuccessToast]
 	)
 
 	useEffect(() => {
@@ -71,13 +67,11 @@ export function FormPublicGroup() {
 				name: fieldInput
 			}
 		})
-			.then((req) => {
-				if (req?.data?.data) {
-					setGroups(req.data.data)
-					setHasMore(req.data.data.length === PAGESIZE_FORM)
-				}
+			.then(({ data: req }) => {
+				if (req.error || !req?.data) return
+				setGroups(req.data)
+				setHasMore(req.data.length === PAGESIZE_FORM)
 			})
-			.catch()
 			.finally(() => setIsPending(false))
 	}, [fieldInput, get])
 
@@ -93,15 +87,13 @@ export function FormPublicGroup() {
 				name: fieldInput
 			}
 		})
-			.then((req) => {
-				if (req?.data?.data) {
-					setGroups((prev) => [...prev, ...req.data.data])
-					setHasMore(req.data.data.length === PAGESIZE_FORM)
-				}
+			.then(({ data: req }) => {
+				if (req.error) return
+				setGroups((prev) => [...prev, ...req.data])
+				//setHasMore(req.data.length === PAGESIZE_FORM)
 			})
-			.catch((e) => (e instanceof ErrorServer ? addErrorToast(e) : addErrorToast()))
 			.finally(() => setIsPending(false))
-	}, [pageNumber, fieldInput, get, addErrorToast])
+	}, [pageNumber, fieldInput, get])
 
 	return (
 		<form className="w-full h-full justify-center relative" onSubmit={(e) => e.preventDefault()}>
@@ -113,9 +105,7 @@ export function FormPublicGroup() {
 					styling="ghost"
 					placeholder="Search by group name"
 					opts={{
-						onChange: (e) => {
-							debouncedSetInput(e.currentTarget.value ?? '')
-						}
+						onChange: (e) => debouncedSetInput.current?.(e.currentTarget.value ?? '')
 					}}
 				/>
 				<SVGChevronArrow className="absolute top-0 right-2 translate-y-1.5" />

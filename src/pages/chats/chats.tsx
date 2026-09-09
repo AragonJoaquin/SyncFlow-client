@@ -23,12 +23,10 @@ export function ChatPage() {
 	const { loadMoreMessages } = useChatContext()
 
 	useEffect(() => {
-		get<FullWorkGroup>('/chats_info')
-			.then(({ data }) => {
-				if (!data) return
-				addWorkGroup(data?.data)
-			})
-			.catch(() => {})
+		get<FullWorkGroup>('/chats_info').then(({ data }) => {
+			if (!data || data.error) return
+			addWorkGroup(data?.data)
+		})
 	}, [])
 
 	useEffect(() => {
