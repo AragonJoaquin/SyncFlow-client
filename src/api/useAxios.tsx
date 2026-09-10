@@ -1,13 +1,12 @@
 import { useAnyContext } from '@/context'
-import type { AxiosRequestConfig } from 'axios'
 import { createContext, useCallback, useMemo, type ReactNode } from 'react'
-import { AXIOS_METHODS, type axios_data, type axios_route } from './axios_helper'
+import { AXIOS_METHODS, type axios_config, type axios_data, type axios_route } from './axios_helper'
 import { useAxiosInternalFetch, type return_axios_internal_fetch } from './axiosInstance'
 
 type returnFunc = <T extends any>(
 	route: axios_route,
 	data?: axios_data,
-	conf?: AxiosRequestConfig<any>
+	conf?: axios_config<any>
 ) => return_axios_internal_fetch<T>
 
 interface IAxios {
@@ -33,31 +32,31 @@ export function AxiosProvider({ children }: { children: ReactNode }) {
 
 	// i could make a reducer... but i dont want to :)
 	const axiosGet = useCallback(
-		async <T extends any>(route: axios_route, conf?: AxiosRequestConfig<any>) =>
+		async <T extends any>(route: axios_route, conf?: axios_config<any>) =>
 			await axios_fetch<T>(route, undefined, AXIOS_METHODS.GET, conf),
 		[axios_fetch]
 	)
 
 	const axiosPost = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
+		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.POST, conf),
 		[axios_fetch]
 	)
 
 	const axiosPatch = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
+		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.PATCH, conf),
 		[axios_fetch]
 	)
 
 	const axiosPut = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
+		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.PUT, conf),
 		[axios_fetch]
 	)
 
 	const axiosDelete = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: AxiosRequestConfig<any>) =>
+		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.DELETE, conf),
 		[axios_fetch]
 	)

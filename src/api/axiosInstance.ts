@@ -1,10 +1,12 @@
-import { type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import { type AxiosResponse } from 'axios'
 import { useCallback } from 'react'
 import {
 	AXIOS_INSTANCE,
 	AXIOS_METHODS,
+	default_axios_config,
 	ErrorServer,
 	type axios_avail_methods,
+	type axios_config,
 	type axios_data,
 	type axios_route,
 	type IQueryStruct
@@ -21,8 +23,10 @@ export function useAxiosInternalFetch() {
 			route: axios_route,
 			data: axios_data | undefined,
 			met: axios_avail_methods,
-			conf?: AxiosRequestConfig<any>
+			cfg?: axios_config<any>
 		): return_axios_internal_fetch<T> => {
+			const c = { ...default_axios_config, ...cfg }
+
 			try {
 				const res = await AXIOS_INSTANCE<IQueryStruct<T>>({
 					url: route,
@@ -35,7 +39,7 @@ export function useAxiosInternalFetch() {
 								}
 							}
 						: { headers: {} }),
-					...conf
+					...c?.axios_conf
 				})
 
 				if (!res || !res?.data || res.data.error) {
@@ -49,7 +53,7 @@ export function useAxiosInternalFetch() {
 				const status = e?.response?.status || 500
 				const errorData = e?.response?.data?.data || e?.message || 'Unexpected Error'
 
-				errToast(new ErrorServer(errorData, status))
+				if (!c?.silent) errToast(new ErrorServer(errorData, status))
 				return { data: { error: true } }
 			}
 		},

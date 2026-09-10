@@ -1,8 +1,6 @@
 import { BASE_URL } from '@/utils'
 import type { IQueryStruct } from './axios_helper'
 
-const createWS = () => new WebSocket(`${BASE_URL}/ws`)
-
 type ws_actions = (typeof WS_ACTIONS)[keyof typeof WS_ACTIONS]
 
 type ws_client_message<T> = {
@@ -42,8 +40,7 @@ export class ChatWebSocket {
 	private listeners = new Set<() => void>()
 
 	constructor(opts?: websocketOpts) {
-		console.warn('Creating a new instance')
-		this.socket = createWS()
+		this.socket = new WebSocket(`${BASE_URL}/ws`)
 		this.websocketOpts = { ...this.websocketOpts, ...opts }
 
 		// notify subscribers when connection state changes

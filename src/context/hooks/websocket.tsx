@@ -1,4 +1,4 @@
-import { useToastStore } from '@/store'
+import { useOwnUserStore, useToastStore } from '@/store'
 import { useEffect } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
@@ -13,7 +13,9 @@ export function useWebsocket() {
 		}))
 	)
 
-	const { chatWS: socket } = useGetWebsocketInstance()
+	const user = useOwnUserStore(useShallow((s) => s.user))
+
+	const { chatWS: socket } = useGetWebsocketInstance(!!user)
 
 	useEffect(() => {
 		if (!socket) return

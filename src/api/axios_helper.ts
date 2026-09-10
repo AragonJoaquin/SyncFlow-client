@@ -1,5 +1,5 @@
 import { BASE_URL } from '@/utils'
-import axios, { type AxiosResponse } from 'axios'
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
 export class ErrorServer extends Error {
 	statusCode: number = 0
@@ -46,6 +46,15 @@ export const AXIOS_METHODS = {
 export type axios_avail_methods = (typeof AXIOS_METHODS)[keyof typeof AXIOS_METHODS]
 export type axios_data = Record<string, unknown> | FormData
 export type axios_route = `/${string}`
+export type axios_config<T extends any> = {
+	axios_conf?: AxiosRequestConfig<T>
+	silent?: boolean
+}
+
+export const default_axios_config: axios_config<any> = {
+	axios_conf: {},
+	silent: false
+}
 
 export const AXIOS_INSTANCE = axios.create({
 	//TODO: this is going to be a problem later on. remove v1

@@ -1,15 +1,26 @@
 import { ChatWebSocket } from '@/api'
-import { useSyncExternalStore } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 
-// singleton instance
-export const chatWS = new ChatWebSocket()
+interface get_websocket_instance {
+	chatWS: ChatWebSocket | null
+	readyState: number
+	isConnected: boolean
+}
 
-export function useGetWebsocketInstance() {
-	const readyState = useSyncExternalStore(chatWS.subscribe, chatWS.getSnapshot)
+export function useGetWebsocketInstance(isLogged: boolean): get_websocket_instance {
+	const chatWS = useMemo(() => {
+		if (!isLogged) return null
+		return new ChatWebSocket()
+	}, [isLogged])
+
+	const readyState = useSyncExternalStore(
+		chatWS ? chatWS.subscribe : () => () => {},
+		chatWS ? chatWS.getSnapshot : () => WebSocket.CLOSED
+	)
 
 	return {
 		chatWS,
 		readyState,
-		isConnected: readyState === WebSocket.OPEN
+		isConnected: chatWS != null && readyState === WebSocket.OPEN
 	}
 }

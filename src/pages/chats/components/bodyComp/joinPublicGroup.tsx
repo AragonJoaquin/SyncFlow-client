@@ -61,10 +61,12 @@ export function FormPublicGroup() {
 		setHasMore(true)
 
 		get<WorkGroup[]>('/work_group/all', {
-			params: {
-				pageNumber: 0,
-				pageSize: PAGESIZE_FORM,
-				name: fieldInput
+			axios_conf: {
+				params: {
+					pageNumber: 0,
+					pageSize: PAGESIZE_FORM,
+					name: fieldInput
+				}
 			}
 		})
 			.then(({ data: req }) => {
@@ -81,10 +83,12 @@ export function FormPublicGroup() {
 		setIsPending(true)
 
 		get<WorkGroup[]>('/work_group/all', {
-			params: {
-				pageNumber: pageNumber,
-				pageSize: PAGESIZE_FORM,
-				name: fieldInput
+			axios_conf: {
+				params: {
+					pageNumber: pageNumber,
+					pageSize: PAGESIZE_FORM,
+					name: fieldInput
+				}
 			}
 		})
 			.then(({ data: req }) => {
