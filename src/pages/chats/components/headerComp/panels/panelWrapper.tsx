@@ -32,16 +32,17 @@ export function PannelWrapper({
 	const isOpen = activePanel === panelType
 
 	return (
-		<article
-			role="dialog"
+		<dialog
 			aria-label="Group Members"
 			aria-modal="true"
-			className={`fixed inset-0 transition-all duration-300 z-90 ${isOpen ? 'visible' : 'invisible pointer-events-none'}`}
+			className={`fixed inset-0 transition-opacity duration-300 z-90 ${isOpen ? 'visible opacity-100' : 'invisible pointer-events-none opacity-0'}`}
 		>
 			{/*black bg*/}
 			<div
+				role="presentation"
 				className={`absolute inset-0 bg-neutral-900/60 transition-opacity duration-300 z-99 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
 				onClick={onClose}
+				onKeyUp={onClose}
 			/>
 
 			<aside
@@ -75,6 +76,6 @@ export function PannelWrapper({
 
 				<main className={`flex-1 overflow-y-auto px-3 pb-3 ${className}`}>{children}</main>
 			</aside>
-		</article>
+		</dialog>
 	)
 }

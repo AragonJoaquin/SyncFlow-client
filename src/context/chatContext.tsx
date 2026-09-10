@@ -25,21 +25,24 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
 	const socket = useWebsocket()
 
-	const loadMoreMessages = useCallback(async (channel_id: Channel['id']) => {
-		if (SET_CHANNEL_SEARCHED.has(channel_id)) return
+	const loadMoreMessages = useCallback(
+		async (channel_id: Channel['id']) => {
+			if (SET_CHANNEL_SEARCHED.has(channel_id)) return
 
-		const pagination = channelPagination.get(channel_id) ?? { offset: 0, hasMore: true }
-		if (!pagination.hasMore) return
+			const pagination = channelPagination.get(channel_id) ?? { offset: 0, hasMore: true }
+			if (!pagination.hasMore) return
 
-		const { data: res } = await get<{ messages: Message[]; has_more: boolean }>(
-			`/channel/${channel_id}/messages?limit=50&offset=${pagination.offset}`
-		)
+			const { data: res } = await get<{ messages: Message[]; has_more: boolean }>(
+				`/channel/${channel_id}/messages?limit=50&offset=${pagination.offset}`
+			)
 
-		if (res.error) return
+			if (res.error) return
 
-		SET_CHANNEL_SEARCHED.add(channel_id)
-		setMoreMsgs(channel_id, res.data?.messages ?? [], res.data?.has_more ?? true, pagination)
-	}, [])
+			SET_CHANNEL_SEARCHED.add(channel_id)
+			setMoreMsgs(channel_id, res.data?.messages ?? [], res.data?.has_more ?? true, pagination)
+		},
+		[channelPagination.get, get, setMoreMsgs]
+	)
 
 	return (
 		<CHAT_CONTEXT.Provider

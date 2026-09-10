@@ -23,13 +23,13 @@ export function AuthPage() {
 						<Tabs.List className="flex gap-1 p-1 bg-darkFG rounded-lg sm:rounded-xl mb-4 sm:mb-6">
 							<Tabs.Trigger
 								value={TABS_PAGES.LOGIN_TAB}
-								className="flex-1 py-2 px-2 sm:py-2.5 sm:px-4 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold font-Cabin text-secondary-foreground transition-all duration-200 data-[state=active]:bg-neutral-700/70 data-[state=active]:text-primary data-[state=active]:shadow-sm"
+								className="flex-1 py-2 px-2 sm:py-2.5 sm:px-4 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold font-Cabin text-secondary-foreground transition-colors duration-200 data-[state=active]:bg-neutral-700/70 data-[state=active]:text-primary data-[state=active]:shadow-sm"
 							>
 								Log In
 							</Tabs.Trigger>
 							<Tabs.Trigger
 								value={TABS_PAGES.REGISTER_TAB}
-								className="flex-1 py-2 px-2 sm:py-2.5 sm:px-4 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold font-Cabin text-secondary-foreground transition-all duration-200 data-[state=active]:bg-neutral-700/70 data-[state=active]:text-primary data-[state=active]:shadow-sm"
+								className="flex-1 py-2 px-2 sm:py-2.5 sm:px-4 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold font-Cabin text-secondary-foreground transition-colors duration-200 data-[state=active]:bg-neutral-700/70 data-[state=active]:text-primary data-[state=active]:shadow-sm"
 							>
 								Register
 							</Tabs.Trigger>

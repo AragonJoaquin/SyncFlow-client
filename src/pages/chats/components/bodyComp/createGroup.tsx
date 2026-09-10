@@ -6,6 +6,7 @@ import type { FullWorkGroup } from '@/types'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from 'radix-ui'
+import { useId } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -43,8 +44,9 @@ export function CreateGroupForm() {
 	})
 
 	const addWK = useWorkGroupStore((s) => s.addWorkGroup)
-
 	const { post } = useAxios()
+	const group_type_id = useId()
+
 	const onSubmit = async (e: CreateGroupType) => {
 		const file = e[FIELD_NAMES.PICTURE]
 
@@ -82,8 +84,10 @@ export function CreateGroupForm() {
 				/>
 
 				<span className="w-full flex flex-col gap-1">
-					<label className="block text-md font-Cabin text-foreground">Select the group type</label>
-					<SelectInputField inputName={FIELD_NAMES.TYPE} values={GROUP_TYPES} />
+					<label htmlFor={group_type_id} className="block text-md font-Cabin text-foreground">
+						Select the group type
+					</label>
+					<SelectInputField inputName={FIELD_NAMES.TYPE} values={GROUP_TYPES} id={group_type_id} />
 				</span>
 
 				<span className="flex flex-col justify-center items-center w-full">

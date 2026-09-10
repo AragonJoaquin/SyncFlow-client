@@ -51,15 +51,22 @@ export const useCacheUsersStore = create<CacheUsersStore>((set, get) => ({
 	},
 	addUser: (u) => {
 		const { user, membership } = u
-		const userExists = get().users.get(user?.id)
-		if (userExists != undefined) return
-		set((state) => ({
-			...state,
-			users: state.users.set(user?.id, {
+		if (!user?.id) return
+
+		const userExists = get().users.get(user.id)
+		if (userExists) return
+
+		set((state) => {
+			const new_user = new Map(state?.users).set(user?.id, {
 				membership,
 				user
 			})
-		}))
+
+			return {
+				...state,
+				users: new_user
+			}
+		})
 	},
 	removeUser: (user_id) => {
 		const newMap = get().users

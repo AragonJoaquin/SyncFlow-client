@@ -6,6 +6,7 @@ interface ISFImage {
 	className?: string
 	imageUrl: string | undefined
 	title: string
+	alt: string
 	groupId?: number
 	width?: number
 	height?: number
@@ -13,7 +14,7 @@ interface ISFImage {
 }
 
 //groupId means its private
-export function SFImage({ imageUrl, title, groupId, width = 75, height = 75, props, className }: ISFImage) {
+export function SFImage({ imageUrl, title, alt, groupId, width = 75, height = 75, props, className }: ISFImage) {
 	const sharedStyles: CSSProperties = {
 		width,
 		height
@@ -25,7 +26,7 @@ export function SFImage({ imageUrl, title, groupId, width = 75, height = 75, pro
 			{imageUrl != null ? (
 				<img
 					title={title}
-					alt={`Image ${title}`}
+					alt={alt}
 					src={url}
 					loading="lazy"
 					className={`${className}`}

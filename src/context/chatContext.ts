@@ -1,6 +1,7 @@
 import type { ChatWebSocket } from '@/api'
 import type { Channel } from '@/types'
 import { createContext } from 'react'
+import { useAnyContext } from './useAnyContext'
 
 export const SIDE_PANNELS_STATE = {
 	PINNED: 'pinned',
@@ -23,4 +24,5 @@ export interface IChatContext {
 	loadMoreMessages: (channel_id: Channel['id']) => Promise<void>
 }
 
-export const CHAT_CONTEXT = createContext<IChatContext | null>(null)
+export const CHAT_CONTEXT = createContext<IChatContext | undefined>(undefined)
+export const useChatContext = () => useAnyContext(CHAT_CONTEXT)

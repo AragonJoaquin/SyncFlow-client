@@ -104,16 +104,21 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 	},
 
 	addCategory: (cat) =>
-		set((s) => ({
-			...s,
-			categories: s.categories.set(cat.id, {
+		set((s) => {
+			const new_cat = new Map(s.categories).set(cat.id, {
 				...cat,
 				channel: cat?.channel ?? []
 			})
-		})),
+
+			return {
+				...s,
+				categories: new_cat
+			}
+		}),
+
 	removeCategory: (cat) =>
 		set((s) => {
-			const categories = get().categories
+			const categories = new Map(get()?.categories)
 			categories.delete(cat)
 			return {
 				...s,

@@ -60,7 +60,7 @@ export function LoginForm() {
 				<Form.Submit asChild>
 					<button
 						type="submit"
-						className="w-full py-2.5 sm:py-3 px-4 bg-primary hover:bg-primary-hover text-primary-foreground font-bold font-Cabin rounded-lg sm:rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-primary/25 cursor-pointer text-sm sm:text-base"
+						className="w-full py-2.5 sm:py-3 px-4 bg-primary hover:bg-primary-hover text-primary-foreground font-bold font-Cabin rounded-lg sm:rounded-xl transition-shadow duration-200 hover:shadow-lg hover:shadow-primary/25 cursor-pointer text-sm sm:text-base"
 					>
 						Log in
 					</button>

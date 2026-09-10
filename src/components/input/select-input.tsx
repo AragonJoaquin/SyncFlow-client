@@ -9,10 +9,11 @@ interface ISelectInput {
 	inputName: string
 	values: Record<string, string>
 	defaultVal?: string
+	id?: string
 }
 
 //TODO: add errors + more features
-export function SelectInputField({ inputName, values, defaultVal }: ISelectInput) {
+export function SelectInputField({ inputName, values, defaultVal, id }: ISelectInput) {
 	const {
 		register,
 		setValue,
@@ -23,7 +24,7 @@ export function SelectInputField({ inputName, values, defaultVal }: ISelectInput
 
 	return (
 		<>
-			<Form.Field name={inputName}>
+			<Form.Field name={inputName} id={id}>
 				<Select.Root
 					{...register(inputName)}
 					onValueChange={(e) => setValue(inputName, e)}

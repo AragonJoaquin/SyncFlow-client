@@ -1,5 +1,5 @@
 import { useAnyContext } from '@/context'
-import { createContext, useCallback, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react'
 
 interface IAside {
 	isMobileOpen: boolean
@@ -7,7 +7,7 @@ interface IAside {
 	toggleIsMobileOpen: () => void
 }
 
-export const ASIDE_BAR_CONTEXT = createContext<IAside>({} as IAside)
+export const ASIDE_BAR_CONTEXT = createContext<IAside | undefined>(undefined)
 
 export function AsideBarProvider({ children }: { children: ReactNode }) {
 	const [isMobileOpen, setMob] = useState(false)
@@ -20,17 +20,15 @@ export function AsideBarProvider({ children }: { children: ReactNode }) {
 		setMob((b) => !b)
 	}, [])
 
-	return (
-		<ASIDE_BAR_CONTEXT.Provider
-			value={{
-				isMobileOpen,
-				setIsMobileOpen,
-				toggleIsMobileOpen
-			}}
-		>
-			{children}
-		</ASIDE_BAR_CONTEXT.Provider>
-	)
+	const ctx_value = useMemo(() => {
+		return {
+			isMobileOpen,
+			setIsMobileOpen,
+			toggleIsMobileOpen
+		}
+	}, [isMobileOpen, setIsMobileOpen, toggleIsMobileOpen])
+
+	return <ASIDE_BAR_CONTEXT.Provider value={ctx_value}>{children}</ASIDE_BAR_CONTEXT.Provider>
 }
 
 export const useAsideBarContext = () => useAnyContext<IAside>(ASIDE_BAR_CONTEXT)

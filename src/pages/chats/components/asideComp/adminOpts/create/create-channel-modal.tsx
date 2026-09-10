@@ -5,7 +5,7 @@ import { useChatContext } from '@/context'
 import { useWorkGroupStore } from '@/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from 'radix-ui'
-import { useMemo } from 'react'
+import { useId, useMemo } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
 import { useShallow } from 'zustand/shallow'
@@ -36,6 +36,8 @@ export function CreateChannelModal() {
 	const { websocket } = useChatContext()
 	const categories = useWorkGroupStore(useShallow((s) => s.categories))
 	const getChannelByName = useWorkGroupStore(useShallow((s) => s.getChannelByName))
+
+	const label_category = useId()
 
 	const onSubmit = (data: ChannelFormData) => {
 		if (!websocket?.CHAT_SOCKET) return
@@ -73,7 +75,10 @@ export function CreateChannelModal() {
 					/>
 
 					<span className="flex flex-col">
-						<label htmlFor="" className="block text-xs sm:text-sm font-semibold font-Cabin text-foreground mb-1.5">
+						<label
+							htmlFor={label_category}
+							className="block text-xs sm:text-sm font-semibold font-Cabin text-foreground mb-1.5"
+						>
 							Category
 						</label>
 
@@ -81,6 +86,7 @@ export function CreateChannelModal() {
 							inputName={FIELD_NAMES.CATEGORY_ID}
 							values={valuesSelect}
 							defaultVal={valuesSelect[0] ?? ''}
+							id={label_category}
 						/>
 					</span>
 

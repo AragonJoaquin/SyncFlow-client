@@ -44,7 +44,7 @@ export function MainMenuNoGroup() {
 
 			<p className="text-unfocused text-pretty text-center">Or start tinkering with these buttons!</p>
 
-			<ul className="flex flex-row gap-4 bg-neutral-800/40 px-2  py-2 rounded-lg *:bg-neutral-800 *:rounded-md *:p-2 *:hover:scale-105 *:transition-all *:hover:bg-neutral-700 *:cursor-pointer">
+			<ul className="flex flex-row gap-4 bg-neutral-800/40 px-2  py-2 rounded-lg *:bg-neutral-800 *:rounded-md *:p-2 *:hover:scale-105 *:transition-colors *:hover:bg-neutral-700 *:cursor-pointer">
 				<li>
 					<SVGUsers />
 				</li>

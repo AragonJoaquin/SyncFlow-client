@@ -46,6 +46,7 @@ export const ImageUploader = ({ fieldName, label }: ImageUploaderProps) => {
 
 			<div
 				role="button"
+				tabIndex={0}
 				onDragOver={(e) => {
 					e.preventDefault()
 					setIsDragging(true)

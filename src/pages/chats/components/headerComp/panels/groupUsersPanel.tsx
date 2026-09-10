@@ -34,15 +34,19 @@ export function GroupUsersPanel() {
 
 	// we group them by role
 	const grouped = useMemo(() => {
-		const groups: RoleGroup[] = ROLE_ORDER.map((role) => {
+		return ROLE_ORDER.reduce<RoleGroup[]>((acc, role) => {
 			const roleUpper = role.toUpperCase() as Uppercase<typeof role>
-			return {
+
+			if (!users.length) return acc
+
+			acc.push({
 				label: roleUpper,
 				color: ROLE_COLORS[roleUpper] ?? ROLE_COLORS.MEMBER,
 				users: filtered.filter(({ membership: m }) => m.group_role.name.toUpperCase() === roleUpper)
-			}
-		}).filter((g) => g.users.length > 0)
-		return groups
+			})
+
+			return acc
+		}, [])
 	}, [filtered])
 
 	//count the total to then display it

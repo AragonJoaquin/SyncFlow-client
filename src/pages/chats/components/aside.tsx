@@ -48,11 +48,13 @@ export function AsideBar() {
 				<SVGHamburger className="w-6 h-6 text-whiteText" />
 			</SFButton>
 
-			<div
+			<button
+				tabIndex={0}
+				aria-labelledby="Toggles Aside bar to show more options"
 				//TODO: make the transition work lol
 				className={`fixed ${!isMobileOpen ? 'hidden opacity-0' : 'opacity-100'} bg-black/50 h-full w-full transition-all duration-200 z-99`}
 				onClick={() => setIsMobileOpen(false)}
-				// onKeyUp={() => setIsMobileOpen(false)}
+				onKeyUp={() => setIsMobileOpen(false)}
 			/>
 
 			<div
