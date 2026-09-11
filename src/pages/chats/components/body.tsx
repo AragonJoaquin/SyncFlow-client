@@ -87,6 +87,7 @@ function NoChannelSelected() {
 					title={workGroup?.name ?? ''}
 					imageUrl={workGroup?.group_pic}
 					className="shadow-lg border border-primaryText/10"
+					alt={`Group picture from ${workGroup?.name}`}
 				/>
 				<span className="flex flex-col gap-y-1">
 					<h4 className="text-3xl font-semibold text-primaryText tracking-tight">{workGroup?.name}</h4>

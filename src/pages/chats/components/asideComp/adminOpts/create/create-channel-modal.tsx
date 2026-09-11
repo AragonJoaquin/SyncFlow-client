@@ -1,7 +1,6 @@
 import { WS_ACTIONS } from '@/api'
 import { SFButton, SFCustomDialog } from '@/components'
 import { SelectInputField, TextInput } from '@/components/input'
-import { useChatContext } from '@/context'
 import { useWorkGroupStore } from '@/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from 'radix-ui'
@@ -10,6 +9,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
 import { useShallow } from 'zustand/shallow'
 import { ADMIN_MODALS_OPEN, useAdminOptsContext } from '../context'
+import { useChatContext } from '@/context'
 
 const FIELD_NAMES = {
 	NAME: 'channel_name',

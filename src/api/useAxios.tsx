@@ -20,7 +20,7 @@ interface IAxios {
 	patch: returnFunc
 }
 
-const AXIOS_CONTEXT = createContext<IAxios | null>(null)
+const AXIOS_CONTEXT = createContext<IAxios | undefined>(undefined)
 
 //NOTE: yes, this is a hidden context painted as a hook
 // then why is it here? its better to think its a hook rather a context because
@@ -76,4 +76,4 @@ export function AxiosProvider({ children }: { children: ReactNode }) {
 }
 
 //NOTE: it should say "useAxiosContext"... but i prefer this way... to keep the abstraction simple
-export const useAxios = () => useAnyContext<IAxios | null>(AXIOS_CONTEXT)
+export const useAxios = () => useAnyContext(AXIOS_CONTEXT)

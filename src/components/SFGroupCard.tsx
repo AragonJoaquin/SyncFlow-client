@@ -1,5 +1,4 @@
-import { SFButton } from '@/components'
-import { SFImage } from '@/components/SFImage'
+import { SFButton, SFImage } from '@/components'
 import type { WorkGroup } from '@/types'
 
 interface GroupCardProps {
@@ -10,7 +9,14 @@ interface GroupCardProps {
 export function SFGroupCard({ group, onJoin }: GroupCardProps) {
 	return (
 		<span className="flex items-center gap-3 p-2 bg-neutral-800/50 rounded-md hover:bg-neutral-800 transition-colors">
-			<SFImage imageUrl={group.group_pic} title={group.name} width={40} height={40} className="rounded-md" />
+			<SFImage
+				imageUrl={group.group_pic}
+				alt={`Group image of ${group.name}`}
+				title={group.name}
+				width={40}
+				height={40}
+				className="rounded-md"
+			/>
 
 			<span className="flex flex-col flex-1 min-w-0">
 				<span className="text-sm font-Cabin font-semibold text-foreground truncate" title={group.name}>
