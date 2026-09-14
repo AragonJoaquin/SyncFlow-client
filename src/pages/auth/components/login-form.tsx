@@ -1,5 +1,5 @@
 import { useAxios } from '@/api'
-import { TextInput } from '@/components/input/text-input'
+import { TextInput } from '@/components/input'
 import { useOwnUserStore } from '@/store'
 import type { User } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,7 +22,7 @@ type FormData = z.infer<typeof schema>
 
 export function LoginForm() {
 	const [, navigate] = useLocation()
-	const { handleSubmit, setError, ...methods } = useForm<FormData>({
+	const { handleSubmit, ...methods } = useForm<FormData>({
 		resolver: zodResolver(schema),
 		mode: 'onChange'
 	})
@@ -46,7 +46,7 @@ export function LoginForm() {
 	}
 
 	return (
-		<FormProvider {...{ handleSubmit, setError, ...methods }}>
+		<FormProvider {...{ handleSubmit, ...methods }}>
 			<Form.Root className="space-y-4 sm:space-y-5" onSubmit={handleSubmit(onSubmit)}>
 				<TextInput
 					type="text"

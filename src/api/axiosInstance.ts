@@ -43,8 +43,8 @@ export function useAxiosInternalFetch() {
 				})
 
 				if (!res || !res?.data || res.data.error) {
-					const { status, data } = res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
-					errToast(new ErrorServer(data?.data, status))
+					const { status, data, statusText } = res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
+					errToast(new ErrorServer(data?.data, status, statusText))
 					return res
 				}
 

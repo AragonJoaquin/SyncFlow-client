@@ -1,8 +1,8 @@
-import { Form } from 'radix-ui'
 import { useId, type HTMLInputAutoCompleteAttribute, type HTMLInputTypeAttribute } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { INPUT_STYLINGS, type AVAILABLE_INPUT_STYLES } from '.'
 import { FormMessageError } from './form-message-error'
+import { FormField, FormControl, FormLabel } from '@radix-ui/react-form'
 
 type ITextInput = {
 	styling?: AVAILABLE_INPUT_STYLES
@@ -34,16 +34,16 @@ export function TextInput({
 	} = useFormContext<Record<typeof inputName, any>>()
 
 	const error = errors[inputName as keyof typeof errors]
-
 	const id = useId()
+
 	return (
-		<Form.Field className={`flex flex-col ${fieldClassName}`} {...register(inputName)}>
+		<FormField className={`flex flex-col ${fieldClassName}`} {...register(inputName)}>
 			{label != '' && (
-				<Form.Label className={InputLabelStyles} htmlFor={id}>
+				<FormLabel className={InputLabelStyles} htmlFor={id}>
 					{label}
-				</Form.Label>
+				</FormLabel>
 			)}
-			<Form.Control
+			<FormControl
 				type={type}
 				className={`${INPUT_STYLINGS[styling]} ${className} focus:outline-none focus:ring-2 focus:ring-primaryText/30 focus:border-primaryText transition-all duration-200`}
 				id={id}
@@ -52,6 +52,6 @@ export function TextInput({
 			/>
 
 			{!disableErrors && error != undefined && <FormMessageError error={error} />}
-		</Form.Field>
+		</FormField>
 	)
 }

@@ -16,7 +16,7 @@ export default function App() {
 				<Route
 					path="/"
 					component={() =>
-						user ? (
+						user != null ? (
 							<ChatProvider>
 								<ChatPage />
 							</ChatProvider>

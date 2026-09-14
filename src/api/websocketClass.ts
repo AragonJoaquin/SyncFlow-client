@@ -40,7 +40,7 @@ export class ChatWebSocket {
 	private listeners = new Set<() => void>()
 
 	constructor(opts?: websocketOpts) {
-		this.socket = new WebSocket(`${BASE_URL}/ws`)
+		this.socket = new WebSocket(`${BASE_URL}/v1/ws`)
 		this.websocketOpts = { ...this.websocketOpts, ...opts }
 
 		// notify subscribers when connection state changes
