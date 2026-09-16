@@ -1,4 +1,4 @@
-import { DropdownMenu } from 'radix-ui'
+import { Root, Trigger, Portal, Content, Item, Arrow } from '@radix-ui/react-dropdown-menu'
 import type { MouseEvent, ReactNode } from 'react'
 import { SVGMention } from './svgs'
 
@@ -21,11 +21,11 @@ interface ISFDrop {
 }
 export function SFDropDown({ children, elements }: ISFDrop) {
 	return (
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger asChild>{children}</DropdownMenu.Trigger>
+		<Root>
+			<Trigger asChild>{children}</Trigger>
 
-			<DropdownMenu.Portal>
-				<DropdownMenu.Content
+			<Portal>
+				<Content
 					className="min-w-[260px] bg-darkFG rounded-xl p-4 border border-zinc-700 shadow-xl animate-in fade-in zoom-in duration-200"
 					sideOffset={5}
 				>
@@ -39,7 +39,7 @@ export function SFDropDown({ children, elements }: ISFDrop) {
 								</span>
 
 								{values?.map(({ name, SVG, style = 'normal', onClick }) => (
-									<DropdownMenu.Item
+									<Item
 										className={`
                                             min-h-[40px] relative
                                             flex items-center justify-between px-4 py-3 mb-2 text-white outline-none 
@@ -58,14 +58,14 @@ export function SFDropDown({ children, elements }: ISFDrop) {
 												className={`${style === STYLES_AVAILABLE.DELETE ? 'text-whiteText' : 'text-zinc-400'} absolute right-2 top-1/2 -translate-y-1/2`}
 											/>
 										)}
-									</DropdownMenu.Item>
+									</Item>
 								))}
 							</section>
 						)
 					})}
-					<DropdownMenu.Arrow className="fill-darkBG size-4" />
-				</DropdownMenu.Content>
-			</DropdownMenu.Portal>
-		</DropdownMenu.Root>
+					<Arrow className="fill-darkBG size-4" />
+				</Content>
+			</Portal>
+		</Root>
 	)
 }

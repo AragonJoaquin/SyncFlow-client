@@ -1,6 +1,6 @@
 import { SFButton, SFDialog } from '@/components'
 import { SVGSearch, SVGSettings, SVGUsers } from '@/components/svgs'
-import { Separator } from 'radix-ui'
+import * as Separator from '@radix-ui/react-separator'
 import { CreateGroupForm } from './createGroup'
 import { JoiningFormDialog } from './joinGroup'
 

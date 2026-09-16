@@ -60,5 +60,6 @@ export const AXIOS_INSTANCE = axios.create({
 	//TODO: this is going to be a problem later on. remove v1
 	baseURL: `${BASE_URL}/v1`,
 	timeout: 5000,
-	withCredentials: true
+	withCredentials: true,
+	validateStatus: () => true //dont throw exceptions on 400, 500 status codes
 })

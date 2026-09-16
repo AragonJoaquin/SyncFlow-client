@@ -15,6 +15,8 @@ const FIELD_NAMES = {
 	CONFIRM_PSWRD: 'confirm_password'
 } as const
 
+type field_names_keys = (typeof FIELD_NAMES)[keyof typeof FIELD_NAMES]
+
 const schema = z
 	.object({
 		[FIELD_NAMES.USERNAME]: z.string().min(3, 'Username should be at least 3 characters.'),
@@ -23,14 +25,14 @@ const schema = z
 		[FIELD_NAMES.CONFIRM_PSWRD]: z.string()
 	})
 	.refine((data) => data[FIELD_NAMES.PASSWORD] === data[FIELD_NAMES.CONFIRM_PSWRD], {
-		message: 'Las contraseñas no coinciden',
+		message: "Passwords don't match",
 		path: [FIELD_NAMES.CONFIRM_PSWRD]
 	})
 
 type RegisterFormData = z.infer<typeof schema>
 
 export function RegisterForm() {
-	const { handleSubmit, ...methods } = useForm<RegisterFormData>({
+	const { handleSubmit, setError, ...methods } = useForm<RegisterFormData>({
 		resolver: zodResolver(schema)
 	})
 
@@ -39,15 +41,21 @@ export function RegisterForm() {
 	const { post } = useAxios()
 
 	const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
-		const { data: res } = await post<User>('/signin', data)
-		if (res.error) return
+		const { data: res } = await post<User>('/signin', data, { silent: true })
+
+		if (res.error) {
+			const col = res.data.column
+			return !col
+				? setError(FIELD_NAMES.USERNAME, { message: res.data.error_message })
+				: setError(col as field_names_keys, { message: res.data.error_message }, { shouldFocus: true })
+		}
 
 		login(res.data)
 		navigate('/')
 	}
 
 	return (
-		<FormProvider {...{ handleSubmit, ...methods }}>
+		<FormProvider {...{ handleSubmit, setError, ...methods }}>
 			<Form.Root className="space-y-4 sm:space-y-5" onSubmit={handleSubmit(onSubmit)}>
 				<TextInput type="text" label="Username" placeholder="test1234" inputName={FIELD_NAMES.USERNAME} />
 

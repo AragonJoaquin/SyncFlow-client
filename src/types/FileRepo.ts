@@ -4,7 +4,7 @@ export type FileRepo = {
 	id: UUIDv4
 	filename: string
 	submitted_at: Date
-	user_id: UUIDv4
+	// user_id: UUIDv4
 
 	file_type: FileType
 }

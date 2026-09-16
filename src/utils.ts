@@ -53,8 +53,8 @@ const needs_to_start_with = 'image/' as const
 export const ZOD_VALIDATE_FILE = (maxSize = MAX_MB_FILE) =>
 	z
 		.custom<FileList>()
-		.transform((file) => (file.length > 0 ? file.item(0)! : new File([], '')))
-		.refine((file) => file.size > 0, {
+		.transform((file) => (file.length > 0 ? file?.item(0) : new File([], '')))
+		.refine((file) => (file?.size ?? 0) > 0, {
 			message: 'File must exists'
 		})
 		.refine((file) => file && file.size <= maxSize, {

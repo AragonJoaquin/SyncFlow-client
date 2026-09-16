@@ -1,4 +1,4 @@
-import { Form } from 'radix-ui'
+import { Field, Label, Control } from '@radix-ui/react-form'
 import { useId } from 'react'
 import { useFormContext, type FieldError, type FieldErrorsImpl, type Merge, type UseFormReturn } from 'react-hook-form'
 import { INPUT_STYLINGS, type AVAILABLE_INPUT_STYLES } from '.'
@@ -38,20 +38,20 @@ export function Textarea({
 
 	const id = useId()
 	return (
-		<Form.Field className={`flex flex-col ${fieldClassName}`} {...registerFn(inputName)}>
-			<Form.Label className={InputLabelStyles} htmlFor={id}>
+		<Field className={`flex flex-col ${fieldClassName}`} {...registerFn(inputName)}>
+			<Label className={InputLabelStyles} htmlFor={id}>
 				{label}
-			</Form.Label>
-			<Form.Control asChild>
+			</Label>
+			<Control asChild>
 				<textarea
 					className={`${INPUT_STYLINGS[styling]} ${className} focus:outline-none focus:ring-2 focus:ring-primaryText/30 focus:border-primaryText transition-all duration-200 resize-y`}
 					id={id}
 					placeholder={placeholder}
 					rows={rows}
 				/>
-			</Form.Control>
+			</Control>
 
 			{error !== undefined && <FormMessageError error={error} />}
-		</Form.Field>
+		</Field>
 	)
 }

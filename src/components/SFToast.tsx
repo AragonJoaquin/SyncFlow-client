@@ -1,5 +1,5 @@
 import { useToastStore, type SFToast } from '@/store/toastStore'
-import { Toast } from 'radix-ui'
+import * as Toast  from '@radix-ui/react-toast'
 import { useShallow } from 'zustand/shallow'
 
 const VARIANT_STYLES = {

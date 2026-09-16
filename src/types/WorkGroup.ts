@@ -3,13 +3,13 @@ import type { CategoryWithChannels, FileRepo, GroupMemberWithProfile, UUIDv4 } f
 export type WorkGroup = {
 	id: number
 	name: string
-	description?: string
+	description: string
 	created_at: Date
 	deleted_at?: Date
 
 	group_type: GroupType
 	owner_id: UUIDv4
-	group_pic?: UUIDv4
+	group_pic?: FileRepo
 }
 
 export type GroupRole = {

@@ -4,7 +4,7 @@ import { TextInput } from '@/components/input'
 import { useChatContext } from '@/context'
 import type { Category } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form } from 'radix-ui'
+import * as Form from '@radix-ui/react-form'
 import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -74,4 +74,3 @@ export function EditCategoryModal({ trigger, category }: EditCategoryModalProps)
 		</SFDialog>
 	)
 }
-

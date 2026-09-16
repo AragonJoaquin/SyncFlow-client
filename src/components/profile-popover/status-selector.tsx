@@ -1,4 +1,4 @@
-import { DropdownMenu } from 'radix-ui'
+import { Root, Trigger, Portal, Content, Item } from '@radix-ui/react-dropdown-menu'
 import { STATES_COLORS, STATES_NAMES } from './constants'
 
 const STATUS_OPTIONS = [
@@ -28,8 +28,8 @@ export function StatusSelector({ currentStatus, onStatusChange }: StatusSelector
 	const current = STATUS_OPTIONS.find((s) => s.name === currentStatus) ?? STATUS_OPTIONS[STATUS_OPTIONS.length - 1]
 
 	return (
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger asChild>
+		<Root>
+			<Trigger asChild>
 				<button
 					type="button"
 					className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-700/50 transition-colors w-full text-left cursor-pointer"
@@ -48,15 +48,15 @@ export function StatusSelector({ currentStatus, onStatusChange }: StatusSelector
 						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
 					</svg>
 				</button>
-			</DropdownMenu.Trigger>
+			</Trigger>
 
-			<DropdownMenu.Portal>
-				<DropdownMenu.Content
+			<Portal>
+				<Content
 					className="min-w-[200px] bg-darkFG rounded-lg border border-zinc-700 shadow-xl p-1 animate-appear-from"
 					sideOffset={5}
 				>
 					{STATUS_OPTIONS.map(({ name, label, color }) => (
-						<DropdownMenu.Item
+						<Item
 							key={name}
 							className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm text-whiteText outline-none cursor-pointer transition-colors ${
 								name === currentStatus ? 'bg-neutral-700/50' : 'hover:bg-neutral-700/30'
@@ -65,10 +65,10 @@ export function StatusSelector({ currentStatus, onStatusChange }: StatusSelector
 						>
 							<div className={`w-3 h-3 rounded-full ${color}`} />
 							<span className="capitalize">{label}</span>
-						</DropdownMenu.Item>
+						</Item>
 					))}
-				</DropdownMenu.Content>
-			</DropdownMenu.Portal>
-		</DropdownMenu.Root>
+				</Content>
+			</Portal>
+		</Root>
 	)
 }

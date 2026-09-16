@@ -22,31 +22,42 @@ type FormData = z.infer<typeof schema>
 
 export function LoginForm() {
 	const [, navigate] = useLocation()
-	const { handleSubmit, ...methods } = useForm<FormData>({
+	const { handleSubmit, setError, resetField, ...methods } = useForm<FormData>({
 		resolver: zodResolver(schema),
 		mode: 'onChange'
 	})
+
+	const {
+		formState: { isDirty }
+	} = methods
 
 	const { login } = useOwnUserStore()
 	const { post } = useAxios()
 
 	const onSubmit: SubmitHandler<FormData> = async (data) => {
+		if (!isDirty) return
+		resetField(FIELD_NAMES.PASSWORD)
+
 		const user_or_email = data[FIELD_NAMES.USERNAME_OR_EMAIL]
 		const itsEmail = z.email().safeParse(user_or_email)
 
-		const { data: res } = await post<User>('/login', {
-			password: data[FIELD_NAMES.PASSWORD],
-			...(itsEmail.success ? { email: user_or_email } : { name: user_or_email })
-		})
+		const { data: res } = await post<User>(
+			'/login',
+			{
+				password: data[FIELD_NAMES.PASSWORD],
+				...(itsEmail.success ? { email: user_or_email } : { name: user_or_email })
+			},
+			{ silent: true }
+		)
 
-		if (res.error) return
+		if (res.error) return setError(FIELD_NAMES.PASSWORD, { message: res.data.error_message })
 
 		login(res.data)
 		navigate('/')
 	}
 
 	return (
-		<FormProvider {...{ handleSubmit, ...methods }}>
+		<FormProvider {...{ handleSubmit, setError, resetField, ...methods }}>
 			<Form.Root className="space-y-4 sm:space-y-5" onSubmit={handleSubmit(onSubmit)}>
 				<TextInput
 					type="text"

@@ -1,12 +1,12 @@
 import { WS_ACTIONS } from '@/api'
 import { SFButton } from '@/components'
-import { ImageUploader, TextInput } from '@/components/input'
+import { TextInput } from '@/components/input'
 import { SVGPlus, SVGSendArrow } from '@/components/svgs'
 import { useChatContext } from '@/context'
 import { useWorkGroupStore } from '@/store'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form } from 'radix-ui'
+import * as Form from '@radix-ui/react-form'
 import { useRef } from 'react'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 import z from 'zod'
@@ -24,8 +24,8 @@ const FIELD_NAMES = {
 const schema = z
 	.object({
 		[FIELD_NAMES.SEND_MESSAGE]: z.string(),
-		[FIELD_NAMES.CITING_ID]: z.number().nullable(),
-		[FIELD_NAMES.FILE]: ZOD_VALIDATE_FILE().nullable()
+		[FIELD_NAMES.CITING_ID]: z.number().nullable().default(null),
+		[FIELD_NAMES.FILE]: ZOD_VALIDATE_FILE().nullable().default(null)
 	})
 	.refine((e) => e[FIELD_NAMES.SEND_MESSAGE] || e[FIELD_NAMES.FILE], 'Cannot send an empty message')
 
@@ -90,9 +90,9 @@ export function FooterChat() {
 							</h4>
 						)
 					})}
-				<span>
-					<ImageUploader fieldName={FIELD_NAMES.FILE} />
-				</span>
+				{/* <span> */}
+				{/* 	<ImageUploader fieldName={FIELD_NAMES.FILE} /> */}
+				{/* </span> */}
 
 				{/* {attachedImage ? ( */}
 				{/* 	<span className="relative flex items-center"> */}

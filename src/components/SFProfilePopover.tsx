@@ -1,5 +1,5 @@
 import { useOwnUserStore } from '@/store'
-import { Popover } from 'radix-ui'
+import { Root, Trigger, Portal, Content } from '@radix-ui/react-popover'
 import { useState } from 'react'
 import { ProfileDisplay, ProfileEditForm, STATES_ENUM } from './profile-popover'
 import { SFButton } from './SFButton'
@@ -24,15 +24,15 @@ export function SFProfilePopover() {
 	}
 
 	return (
-		<Popover.Root open={open} onOpenChange={setOpen}>
-			<Popover.Trigger asChild>
+		<Root open={open} onOpenChange={setOpen}>
+			<Trigger asChild>
 				<SFButton styling="terciary" aria-label="Open profile settings">
 					<SVGSettings className="w-5 h-5" />
 				</SFButton>
-			</Popover.Trigger>
+			</Trigger>
 
-			<Popover.Portal>
-				<Popover.Content
+			<Portal>
+				<Content
 					className="min-w-[320px] max-w-[400px] bg-darkFG rounded-xl border border-zinc-700 shadow-xl p-4 data-[state=open]:animate-appear-from z-101"
 					side="top"
 					align="start"
@@ -44,8 +44,8 @@ export function SFProfilePopover() {
 					) : (
 						<ProfileDisplay user={user} onEdit={() => setIsEditing(true)} onStatusChange={handleStatusChange} />
 					)}
-				</Popover.Content>
-			</Popover.Portal>
-		</Popover.Root>
+				</Content>
+			</Portal>
+		</Root>
 	)
 }

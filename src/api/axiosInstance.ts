@@ -9,11 +9,12 @@ import {
 	type axios_config,
 	type axios_data,
 	type axios_route,
+	type ErrorData,
 	type IQueryStruct
 } from './axios_helper'
 import { useToastStore } from '@/store'
 
-export type return_axios_internal_fetch<T> = Promise<AxiosResponse<IQueryStruct<T>> | { data: { error: true } }>
+export type return_axios_internal_fetch<T> = Promise<AxiosResponse<IQueryStruct<T>>>
 
 export function useAxiosInternalFetch() {
 	const errToast = useToastStore((s) => s.addErrorToast)
@@ -27,35 +28,28 @@ export function useAxiosInternalFetch() {
 		): return_axios_internal_fetch<T> => {
 			const c = { ...default_axios_config, ...cfg }
 
-			try {
-				const res = await AXIOS_INSTANCE<IQueryStruct<T>>({
-					url: route,
-					method: met,
-					...(met !== AXIOS_METHODS.GET && data != undefined
-						? {
-								data,
-								headers: {
-									'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
-								}
+			const res = await AXIOS_INSTANCE<IQueryStruct<T>>({
+				url: route,
+				method: met,
+				...(met !== AXIOS_METHODS.GET && data != undefined
+					? {
+							data,
+							headers: {
+								'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
 							}
-						: { headers: {} }),
-					...c?.axios_conf
-				})
+						}
+					: { headers: {} }),
+				...c?.axios_conf
+			})
 
-				if (!res || !res?.data || res.data.error) {
-					const { status, data, statusText } = res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
-					errToast(new ErrorServer(data?.data, status, statusText))
-					return res
-				}
-
-				return res as AxiosResponse<Extract<IQueryStruct<T>, { error: false }>>
-			} catch (e: any) {
-				const status = e?.response?.status || 500
-				const errorData = e?.response?.data?.data || e?.message || 'Unexpected Error'
-
-				if (!c?.silent) errToast(new ErrorServer(errorData, status))
-				return { data: { error: true } }
+			if (!res || !res?.data || res.data.error) {
+				const { status, data, statusText } = res
+				if (!c?.silent)
+					errToast(new ErrorServer(data?.data as ErrorData, status || 500, statusText || 'Unexpected Error'))
+				return res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
 			}
+
+			return res as AxiosResponse<Extract<IQueryStruct<T>, { error: false }>>
 		},
 		[errToast]
 	)

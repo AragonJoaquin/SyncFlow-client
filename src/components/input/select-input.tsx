@@ -1,4 +1,5 @@
-import { Form, Select } from 'radix-ui'
+import { Field } from '@radix-ui/react-form'
+import * as Select from '@radix-ui/react-select'
 import { useFormContext } from 'react-hook-form'
 import { InputLabelStyles } from '.'
 import { SFButton } from '../SFButton'
@@ -24,7 +25,7 @@ export function SelectInputField({ inputName, values, defaultVal, id }: ISelectI
 
 	return (
 		<>
-			<Form.Field name={inputName} id={id}>
+			<Field name={inputName} id={id}>
 				<Select.Root
 					{...register(inputName)}
 					onValueChange={(e) => setValue(inputName, e)}
@@ -61,7 +62,7 @@ export function SelectInputField({ inputName, values, defaultVal, id }: ISelectI
 					</Select.Portal>
 				</Select.Root>
 				{error != undefined && <FormMessageError error={error} />}
-			</Form.Field>
+			</Field>
 		</>
 	)
 }
