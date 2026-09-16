@@ -85,7 +85,7 @@ function NoChannelSelected() {
 			<header className="flex flex-col justify-between items-center gap-4">
 				<SFImage
 					title={workGroup?.name ?? ''}
-					imageUrl={workGroup?.group_pic}
+					imageUrl={workGroup?.group_pic?.id}
 					className="shadow-lg border border-primaryText/10"
 					alt={`Group picture from ${workGroup?.name}`}
 				/>

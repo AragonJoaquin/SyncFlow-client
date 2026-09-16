@@ -10,7 +10,7 @@ export function SFGroupCard({ group, onJoin }: GroupCardProps) {
 	return (
 		<span className="flex items-center gap-3 p-2 bg-neutral-800/50 rounded-md hover:bg-neutral-800 transition-colors">
 			<SFImage
-				imageUrl={group.group_pic}
+				imageUrl={group.group_pic?.id}
 				alt={`Group image of ${group.name}`}
 				title={group.name}
 				width={40}

@@ -1,5 +1,6 @@
 import { createContext } from 'react'
 import { useAnyContext } from './useAnyContext'
+
 export interface IGlobalContext {
 	pendingUserGroups: boolean
 }

@@ -28,28 +28,34 @@ export function useAxiosInternalFetch() {
 		): return_axios_internal_fetch<T> => {
 			const c = { ...default_axios_config, ...cfg }
 
-			const res = await AXIOS_INSTANCE<IQueryStruct<T>>({
-				url: route,
-				method: met,
-				...(met !== AXIOS_METHODS.GET && data != undefined
-					? {
-							data,
-							headers: {
-								'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+			try {
+				const res = await AXIOS_INSTANCE<IQueryStruct<T>>({
+					url: route,
+					method: met,
+					...(met !== AXIOS_METHODS.GET && data != undefined
+						? {
+								data,
+								headers: {
+									'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+								}
 							}
-						}
-					: { headers: {} }),
-				...c?.axios_conf
-			})
+						: { headers: {} }),
+					...c?.axios_conf
+				})
 
-			if (!res || !res?.data || res.data.error) {
-				const { status, data, statusText } = res
-				if (!c?.silent)
-					errToast(new ErrorServer(data?.data as ErrorData, status || 500, statusText || 'Unexpected Error'))
-				return res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
+				if (!res || !res?.data || res.data.error) {
+					const { status, data, statusText } = res
+					if (!c?.silent)
+						errToast(new ErrorServer(data?.data as ErrorData, status || 500, statusText || 'Unexpected Error'))
+					return res as AxiosResponse<Extract<IQueryStruct<T>, { error: true }>>
+				}
+
+				return res as AxiosResponse<Extract<IQueryStruct<T>, { error: false }>>
+			} catch {
+				const e = new ErrorServer({ error_message: 'ohmygod the servers are burning down' })
+				errToast(e)
+				throw e
 			}
-
-			return res as AxiosResponse<Extract<IQueryStruct<T>, { error: false }>>
 		},
 		[errToast]
 	)
