@@ -3,15 +3,25 @@ import type { User, UUIDv4 } from '.'
 export type Message = {
 	id: number
 	content: string
-	is_deleted?: boolean // only matters before asserting the message to the state
+	is_deleted: boolean // only matters before asserting the message to the state
 	sent_at: Date
-	last_modified?: Date
+	last_modified: Date | null
 
-	modified_by?: UUIDv4
-	citing_message?: number
+	modified_by: UUIDv4 | null
+	citing_message: number | null
 	channel_id: number
 	sender_id: UUIDv4
-	file_id?: UUIDv4
+	file_id: UUIDv4 | null
+}
+
+export const MessageClientStatus = {
+	STATUS_SENT: 'sent',
+	STATUS_ERROR: 'error'
+} as const
+
+export type MessageClientStatus = {
+	Message: Message
+	Status: (typeof MessageClientStatus)[keyof typeof MessageClientStatus]
 }
 
 export type MessageReaction = {
