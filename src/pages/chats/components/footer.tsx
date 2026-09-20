@@ -3,7 +3,8 @@ import { SFButton } from '@/components'
 import { TextInput } from '@/components/input'
 import { SVGPlus, SVGSendArrow } from '@/components/svgs'
 import { useChatContext } from '@/context'
-import { useOwnUserStore, useWorkGroupStore } from '@/store'
+import { useOwnUserStore, useClientMessagesStore, useWorkGroupStore } from '@/store'
+import type { Message } from '@/types'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Form from '@radix-ui/react-form'
@@ -13,7 +14,8 @@ import z from 'zod'
 import { useShallow } from 'zustand/shallow'
 
 const EXTRA_FIELDS = {
-	CHANNEL_ID: 'channel_id'
+	CHANNEL_ID: 'channel_id',
+	TEMP_ID: 'tempId'
 } as const
 
 const FIELD_NAMES = {
@@ -37,6 +39,7 @@ export function FooterChat() {
 
 	const { activeChannel } = useWorkGroupStore(useShallow((s) => ({ activeChannel: s.activeChannel })))
 	const user = useOwnUserStore(useShallow((s) => s.user))
+	const addClientMessage = useClientMessagesStore((s) => s.addClientMessage)
 
 	const { handleSubmit, register, setValue, reset, ...methods } = useForm({
 		resolver: zodResolver(schema),
@@ -61,12 +64,34 @@ export function FooterChat() {
 	const onSubmit: SubmitHandler<formData> = (data) => {
 		if (!activeChannel || !user) return
 
-		CHAT_SOCKET.sendPayload<formData & { [EXTRA_FIELDS.CHANNEL_ID]: number }>(WS_ACTIONS.WS_PUBLISH, {
-			[FIELD_NAMES.SEND_MESSAGE]: data[FIELD_NAMES.SEND_MESSAGE] ?? '',
-			[EXTRA_FIELDS.CHANNEL_ID]: activeChannel,
-			[FIELD_NAMES.FILE]: data[FIELD_NAMES.FILE],
-			[FIELD_NAMES.CITING_ID]: data[FIELD_NAMES.CITING_ID]
-		})
+		const tempId = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+
+		//TODO: only put the necessary props
+		const pendingMessage: Message = {
+			id: -1,
+			content: data[FIELD_NAMES.SEND_MESSAGE] ?? '',
+			is_deleted: false,
+			sent_at: new Date(),
+			last_modified: null,
+			modified_by: null,
+			citing_message: data[FIELD_NAMES.CITING_ID],
+			channel_id: activeChannel,
+			sender_id: user.id,
+			file_id: null
+		}
+
+		addClientMessage(activeChannel, pendingMessage, tempId)
+
+		CHAT_SOCKET.sendPayload<formData & { [EXTRA_FIELDS.CHANNEL_ID]: number; [EXTRA_FIELDS.TEMP_ID]: string }>(
+			WS_ACTIONS.WS_PUBLISH,
+			{
+				[FIELD_NAMES.SEND_MESSAGE]: data[FIELD_NAMES.SEND_MESSAGE] ?? '',
+				[EXTRA_FIELDS.CHANNEL_ID]: activeChannel,
+				[FIELD_NAMES.FILE]: data[FIELD_NAMES.FILE],
+				[FIELD_NAMES.CITING_ID]: data[FIELD_NAMES.CITING_ID],
+				[EXTRA_FIELDS.TEMP_ID]: tempId
+			}
+		)
 
 		reset({
 			[FIELD_NAMES.SEND_MESSAGE]: '',

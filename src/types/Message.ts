@@ -14,14 +14,15 @@ export type Message = {
 	file_id: UUIDv4 | null
 }
 
-export const MessageClientStatus = {
+export const STATUS_MESSAGE = {
 	STATUS_SENT: 'sent',
 	STATUS_ERROR: 'error'
 } as const
 
 export type MessageClientStatus = {
-	Message: Message
-	Status: (typeof MessageClientStatus)[keyof typeof MessageClientStatus]
+	message: Message
+	status?: (typeof STATUS_MESSAGE)[keyof typeof STATUS_MESSAGE]
+	tempId?: string
 }
 
 export type MessageReaction = {

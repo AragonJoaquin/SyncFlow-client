@@ -1,5 +1,5 @@
 import { WS_ACTIONS } from '@/api'
-import { useCacheUsersStore, useWorkGroupStore } from '@/store'
+import { useCacheUsersStore, useWorkGroupStore, useOwnUserStore, useClientMessagesStore } from '@/store'
 import type { Category, Channel, Message, UUIDv4 } from '@/types'
 import { useCallback } from 'react'
 import { useShallow } from 'zustand/shallow'
@@ -49,10 +49,21 @@ export function useWebsocketActions() {
 		}))
 	)
 
+	const { user } = useOwnUserStore(
+		useShallow((s) => ({
+			user: s.user
+		}))
+	)
+
+	const confirmPendingMessage = useClientMessagesStore((s) => s.confirmMessage)
+
 	//yeah... anu better ideas?
 	const IndexWSActions = useCallback(() => {
 		const MAP_ACTIONS: Record<(typeof WS_ACTIONS)[keyof typeof WS_ACTIONS], function_ws_types> = {
-			[WS_ACTIONS.WS_PUBLISH]: (m: Message) => addMessage(m.channel_id, m),
+			[WS_ACTIONS.WS_PUBLISH]: (m: Message) => {
+				addMessage(m.channel_id, m)
+				if (user?.id === m.sender_id && m.tempId) confirmPendingMessage(m.channel_id, m.tempId, m)
+			},
 			[WS_ACTIONS.WS_CREATE_CATEGORY]: (c: Category) => addCategory({ ...c, channel: [] }),
 			[WS_ACTIONS.WS_UPDATE_CATEGORY]: (c: Category) => updateCategory(c.id, c.name, c.description ?? undefined),
 			[WS_ACTIONS.WS_DELETE_CATEGORY]: (c: Category) => deleteCategory(c.id),
@@ -77,7 +88,7 @@ export function useWebsocketActions() {
 		} as const
 
 		return MAP_ACTIONS
-	}, [workGroup])
+	}, [workGroup, user, addMessage, confirmPendingMessage])
 
 	return IndexWSActions
 }

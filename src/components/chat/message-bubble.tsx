@@ -1,29 +1,22 @@
 import { SFAvatarImage } from '@/components/SFAvatar'
-import { MessageClientStatus, type Message } from '@/types/Message'
-import type { User } from '@/types/User'
+import { STATUS_MESSAGE, type MessageClientStatus, type User } from '@/types'
 import { FormatRelativeTime } from '@/utils'
 import { FilePreview } from './file-preview'
 
 export interface MessageBubbleProps {
-	message: Message
+	msg: MessageClientStatus
 	sender: User | undefined
 	showAvatar: boolean
-	optimisticStatus?: MessageClientStatus['Status']
 	previewUrl?: string
 	onResend?: () => void
 }
 
-export function MessageBubble({
-	message,
-	sender,
-	showAvatar,
-	optimisticStatus,
-	previewUrl,
-	onResend
-}: MessageBubbleProps) {
+export function MessageBubble({ msg, sender, showAvatar, previewUrl, onResend }: MessageBubbleProps) {
+	const { message, status } = msg
+
 	const formattedTime = FormatRelativeTime(message?.sent_at ? new Date(message.sent_at) : new Date())
-	const isPending = optimisticStatus === MessageClientStatus.STATUS_SENT
-	const isError = optimisticStatus === MessageClientStatus.STATUS_ERROR
+	const isPending = status === STATUS_MESSAGE.STATUS_SENT
+	const isError = status === STATUS_MESSAGE.STATUS_ERROR
 
 	return (
 		<article
