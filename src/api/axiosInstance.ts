@@ -52,7 +52,11 @@ export function useAxiosInternalFetch() {
 
 				return res as AxiosResponse<Extract<IQueryStruct<T>, { error: false }>>
 			} catch {
-				const e = new ErrorServer({ error_message: 'ohmygod the servers are burning down' })
+				const e = new ErrorServer(
+					{ error_message: 'ohmygod the servers are burning down' },
+					505,
+					'INTERNAL SERVER ERROR'
+				)
 				errToast(e)
 				throw e
 			}

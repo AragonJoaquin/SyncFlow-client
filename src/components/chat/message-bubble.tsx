@@ -1,5 +1,5 @@
 import { SFAvatarImage } from '@/components/SFAvatar'
-import type { Message } from '@/types/Message'
+import { MessageClientStatus, type Message } from '@/types/Message'
 import type { User } from '@/types/User'
 import { FormatRelativeTime } from '@/utils'
 import { FilePreview } from './file-preview'
@@ -8,14 +8,26 @@ export interface MessageBubbleProps {
 	message: Message
 	sender: User | undefined
 	showAvatar: boolean
+	optimisticStatus?: MessageClientStatus['Status']
+	previewUrl?: string
+	onResend?: () => void
 }
 
-export function MessageBubble({ message, sender, showAvatar }: MessageBubbleProps) {
-	const formattedTime = FormatRelativeTime(new Date(message?.sent_at) ?? new Date())
+export function MessageBubble({
+	message,
+	sender,
+	showAvatar,
+	optimisticStatus,
+	previewUrl,
+	onResend
+}: MessageBubbleProps) {
+	const formattedTime = FormatRelativeTime(message?.sent_at ? new Date(message.sent_at) : new Date())
+	const isPending = optimisticStatus === MessageClientStatus.STATUS_SENT
+	const isError = optimisticStatus === MessageClientStatus.STATUS_ERROR
 
 	return (
 		<article
-			className={`group flex gap-3 px-2 py-0.5 hover:bg-neutral-800/30 -mx-2 rounded ${!showAvatar && 'pl-[42px]'}`}
+			className={`group flex gap-3 px-2 py-0.5 hover:bg-neutral-800/30 -mx-2 rounded ${!showAvatar && 'pl-[42px]'} ${isPending ? 'opacity-60' : ''} ${isError ? 'bg-red-500/10' : ''}`}
 		>
 			{showAvatar && (
 				<span className="w-[40px] flex-shrink-0">
@@ -34,14 +46,38 @@ export function MessageBubble({ message, sender, showAvatar }: MessageBubbleProp
 						>
 							{formattedTime}
 						</time>
+						{isPending && <span className="text-[0.6875rem] text-neutral-500 italic">Sending...</span>}
+						{isError && <span className="text-[0.6875rem] text-red-400 font-medium">Failed to send</span>}
 					</header>
 				)}
 
-				<p className="text-[#dcddde] text-[0.9375rem] whitespace-pre-wrap break-words">{message.content}</p>
+				<p className="text-[#dcddde] text-[0.9375rem] whitespace-pre-wrap wrap-break-words">{message.content}</p>
 
-				{message?.file_id && (
-					<span className="mt-1">
-						<FilePreview fileId={message.file_id} />
+				{previewUrl ? (
+					<span className="mt-1 inline-flex rounded-lg overflow-hidden max-w-[300px]">
+						<img
+							src={previewUrl}
+							alt="Attached preview"
+							className="max-w-[300px] max-h-[200px] object-cover rounded-lg"
+						/>
+					</span>
+				) : (
+					message?.file_id && (
+						<span className="mt-1">
+							<FilePreview fileId={message.file_id} />
+						</span>
+					)
+				)}
+
+				{isError && onResend && (
+					<span className="mt-1 flex items-center gap-2">
+						<button
+							type="button"
+							onClick={onResend}
+							className="text-xs font-medium text-red-300 hover:text-red-200 underline underline-offset-2"
+						>
+							Resend
+						</button>
 					</span>
 				)}
 			</section>

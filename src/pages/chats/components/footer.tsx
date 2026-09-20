@@ -3,13 +3,14 @@ import { SFButton } from '@/components'
 import { TextInput } from '@/components/input'
 import { SVGPlus, SVGSendArrow } from '@/components/svgs'
 import { useChatContext } from '@/context'
-import { useWorkGroupStore } from '@/store'
+import { useOwnUserStore, useWorkGroupStore } from '@/store'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Form from '@radix-ui/react-form'
 import { useRef } from 'react'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 import z from 'zod'
+import { useShallow } from 'zustand/shallow'
 
 const EXTRA_FIELDS = {
 	CHANNEL_ID: 'channel_id'
@@ -34,7 +35,8 @@ type formData = z.infer<typeof schema>
 export function FooterChat() {
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
-	const activeChannel = useWorkGroupStore((s) => s.activeChannel)
+	const { activeChannel } = useWorkGroupStore(useShallow((s) => ({ activeChannel: s.activeChannel })))
+	const user = useOwnUserStore(useShallow((s) => s.user))
 
 	const { handleSubmit, register, setValue, reset, ...methods } = useForm({
 		resolver: zodResolver(schema),
@@ -57,7 +59,7 @@ export function FooterChat() {
 	}
 
 	const onSubmit: SubmitHandler<formData> = (data) => {
-		if (!activeChannel) return
+		if (!activeChannel || !user) return
 
 		CHAT_SOCKET.sendPayload<formData & { [EXTRA_FIELDS.CHANNEL_ID]: number }>(WS_ACTIONS.WS_PUBLISH, {
 			[FIELD_NAMES.SEND_MESSAGE]: data[FIELD_NAMES.SEND_MESSAGE] ?? '',
@@ -65,11 +67,13 @@ export function FooterChat() {
 			[FIELD_NAMES.FILE]: data[FIELD_NAMES.FILE],
 			[FIELD_NAMES.CITING_ID]: data[FIELD_NAMES.CITING_ID]
 		})
+
 		reset({
 			[FIELD_NAMES.SEND_MESSAGE]: '',
 			[FIELD_NAMES.CITING_ID]: null,
 			[FIELD_NAMES.FILE]: undefined
 		})
+
 		removeAttachedImage()
 	}
 
@@ -90,27 +94,19 @@ export function FooterChat() {
 							</h4>
 						)
 					})}
-				{/* <span> */}
-				{/* 	<ImageUploader fieldName={FIELD_NAMES.FILE} /> */}
-				{/* </span> */}
 
-				{/* {attachedImage ? ( */}
-				{/* 	<span className="relative flex items-center"> */}
-				{/* 		<img */}
-				{/* 			src={`data:image/jpeg;base64,${attachedImage}`} */}
-				{/* 			alt="Image" */}
-				{/* 			className="h-10 w-10 object-cover shadow shadow-neutral-600 bg-neutral-800 rounded-md" */}
-				{/* 		/> */}
-				{/* 		<SFButton */}
-				{/* 			styling="none" */}
-				{/* 			onClick={removeAttachedImage} */}
-				{/* 			className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5!" */}
-				{/* 			aria-label="Eliminar imagen" */}
-				{/* 		> */}
-				{/* 			<SVGTrash className="h-3 w-3 text-white" /> */}
-				{/* 		</SFButton> */}
-				{/* 	</span> */}
-				{/* ) : ( */}
+				<input
+					ref={fileInputRef}
+					type="file"
+					hidden
+					aria-label="Attach file"
+					onChange={(e) => {
+						setValue(FIELD_NAMES.FILE, e.target.files?.length ? e.target.files : null, {
+							shouldValidate: true
+						})
+					}}
+				/>
+
 				<SFButton
 					styling="terciary"
 					onClick={() => fileInputRef.current?.click()}
@@ -119,7 +115,6 @@ export function FooterChat() {
 				>
 					<SVGPlus className="min-h-6 min-w-6 h-7 w-7" />
 				</SFButton>
-				{/* )} */}
 
 				<TextInput
 					label=""
