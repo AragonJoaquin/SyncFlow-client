@@ -2,7 +2,7 @@ import { SFTipCard } from '@/components'
 import { MessageBubble, type MessageBubbleProps } from '@/components/chat/message-bubble'
 import { SFImage } from '@/components/SFImage'
 import { useCacheUsersStore, useWorkGroupStore } from '@/store'
-import { useMessagesHistory } from '@/context/hooks/useMessagesHistory'
+import { CLIENT_OR_SERVER, useMessagesHistory } from '@/context/hooks/useMessagesHistory'
 import { useEffect, useMemo, useRef } from 'react'
 import { useShallow } from 'zustand/shallow'
 
@@ -37,13 +37,12 @@ export function Body() {
 
 		let currentChainLength: number = 0
 		history.forEach((m) => {
-			const { message: msg } = m
-			const isConsecutive = result[result.length - 1]?.msg.message.sender_id === msg.sender_id
+			const isConsecutive = result[result.length - 1]?.message.message.sender_id === m.message.sender_id
 
 			const showAvatar = !(isConsecutive && currentChainLength < CHAIN_THRESHOLD)
 			!showAvatar ? currentChainLength++ : (currentChainLength = 0)
 
-			result.push({ msg: m, sender: getUser(msg.sender_id)?.user, showAvatar })
+			result.push({ message: m, sender: getUser(m.message.sender_id)?.user, showAvatar })
 		})
 
 		return result
@@ -54,9 +53,17 @@ export function Body() {
 			<section className={`font-Cabin flex flex-col grow h-full gap-4 p-3`}>
 				{activeChannelId ? (
 					history.length > 0 &&
-					groupedMessages.map(({ msg, showAvatar, sender }) => (
-						<MessageBubble key={msg.tempId ?? msg.message.id} msg={msg} sender={sender} showAvatar={showAvatar} />
-					))
+					groupedMessages.map(({ message: msg, showAvatar, sender }) => {
+						const isClient = msg.type === CLIENT_OR_SERVER.CLIENT
+						return (
+							<MessageBubble
+								key={isClient ? msg.message.tempId : msg.message.id}
+								message={msg}
+								sender={sender}
+								showAvatar={showAvatar}
+							/>
+						)
+					})
 				) : (
 					<NoChannelSelected />
 				)}

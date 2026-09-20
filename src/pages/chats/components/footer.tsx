@@ -4,7 +4,6 @@ import { TextInput } from '@/components/input'
 import { SVGPlus, SVGSendArrow } from '@/components/svgs'
 import { useChatContext } from '@/context'
 import { useOwnUserStore, useClientMessagesStore, useWorkGroupStore } from '@/store'
-import type { Message } from '@/types'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Form from '@radix-ui/react-form'
@@ -15,7 +14,7 @@ import { useShallow } from 'zustand/shallow'
 
 const EXTRA_FIELDS = {
 	CHANNEL_ID: 'channel_id',
-	TEMP_ID: 'tempId'
+	TEMP_ID: 'temp_id'
 } as const
 
 const FIELD_NAMES = {
@@ -66,21 +65,11 @@ export function FooterChat() {
 
 		const tempId = `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-		//TODO: only put the necessary props
-		const pendingMessage: Message = {
-			id: -1,
+		addClientMessage(activeChannel, {
+			tempId,
 			content: data[FIELD_NAMES.SEND_MESSAGE] ?? '',
-			is_deleted: false,
-			sent_at: new Date(),
-			last_modified: null,
-			modified_by: null,
-			citing_message: data[FIELD_NAMES.CITING_ID],
-			channel_id: activeChannel,
-			sender_id: user.id,
-			file_id: null
-		}
-
-		addClientMessage(activeChannel, pendingMessage, tempId)
+			citing_message: data[FIELD_NAMES.CITING_ID]
+		})
 
 		CHAT_SOCKET.sendPayload<formData & { [EXTRA_FIELDS.CHANNEL_ID]: number; [EXTRA_FIELDS.TEMP_ID]: string }>(
 			WS_ACTIONS.WS_PUBLISH,

@@ -1,22 +1,27 @@
 import { SFAvatarImage } from '@/components/SFAvatar'
-import { STATUS_MESSAGE, type MessageClientStatus, type User } from '@/types'
+import { STATUS_MESSAGE, type User } from '@/types'
 import { FormatRelativeTime } from '@/utils'
 import { FilePreview } from './file-preview'
+import { CLIENT_OR_SERVER, type client_or_server_message } from '@/context/hooks/useMessagesHistory'
 
+//TODO: make a component for client and server type
 export interface MessageBubbleProps {
-	msg: MessageClientStatus
+	message: client_or_server_message
 	sender: User | undefined
 	showAvatar: boolean
 	previewUrl?: string
-	onResend?: () => void
+	file_id?: string
 }
 
-export function MessageBubble({ msg, sender, showAvatar, previewUrl, onResend }: MessageBubbleProps) {
-	const { message, status } = msg
+const onResend = () => alert('implement this')
 
-	const formattedTime = FormatRelativeTime(message?.sent_at ? new Date(message.sent_at) : new Date())
-	const isPending = status === STATUS_MESSAGE.STATUS_SENT
-	const isError = status === STATUS_MESSAGE.STATUS_ERROR
+export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl }: MessageBubbleProps) {
+	const { message: msg, type } = message
+
+	const formattedTime = FormatRelativeTime(msg?.sent_at ? new Date(msg.sent_at) : new Date())
+
+	const isPending = type === CLIENT_OR_SERVER.CLIENT && msg.status === STATUS_MESSAGE.STATUS_PENDING
+	const isError = type === CLIENT_OR_SERVER.CLIENT && msg.status === STATUS_MESSAGE.STATUS_ERROR
 
 	return (
 		<article
@@ -44,7 +49,7 @@ export function MessageBubble({ msg, sender, showAvatar, previewUrl, onResend }:
 					</header>
 				)}
 
-				<p className="text-[#dcddde] text-[0.9375rem] whitespace-pre-wrap wrap-break-words">{message.content}</p>
+				<p className="text-[#dcddde] text-[0.9375rem] whitespace-pre-wrap wrap-break-words">{msg.content}</p>
 
 				{previewUrl ? (
 					<span className="mt-1 inline-flex rounded-lg overflow-hidden max-w-[300px]">
@@ -55,9 +60,9 @@ export function MessageBubble({ msg, sender, showAvatar, previewUrl, onResend }:
 						/>
 					</span>
 				) : (
-					message?.file_id && (
+					file_id && (
 						<span className="mt-1">
-							<FilePreview fileId={message.file_id} />
+							<FilePreview fileId={file_id} />
 						</span>
 					)
 				)}

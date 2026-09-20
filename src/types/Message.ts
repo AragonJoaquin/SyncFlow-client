@@ -1,4 +1,4 @@
-import type { User, UUIDv4 } from '.'
+import type { UUIDv4 } from '.'
 
 export type Message = {
 	id: number
@@ -14,17 +14,6 @@ export type Message = {
 	file_id: UUIDv4 | null
 }
 
-export const STATUS_MESSAGE = {
-	STATUS_SENT: 'sent',
-	STATUS_ERROR: 'error'
-} as const
-
-export type MessageClientStatus = {
-	message: Message
-	status?: (typeof STATUS_MESSAGE)[keyof typeof STATUS_MESSAGE]
-	tempId?: string
-}
-
 export type MessageReaction = {
 	user_id: UUIDv4
 	message_id: number
@@ -38,7 +27,24 @@ export type MessageMention = {
 	mentioned_at: Date
 }
 
-export type MessageWithUser = {
+//NOTE: "dtos"
+export type ReceivedMessage = {
 	message: Message
-	sender: User | undefined
+	tempId?: string
+}
+
+export const STATUS_MESSAGE = {
+	// STATUS_SENT: 'sent',
+	STATUS_ERROR: 'error',
+	STATUS_PENDING: 'pending'
+} as const
+
+export type ClientMessageQueueItem = {
+	tempId: string
+	status: (typeof STATUS_MESSAGE)[keyof typeof STATUS_MESSAGE]
+	content: string
+	sent_at: Date
+	channel_id: number
+	citing_message: number | null
+	sender_id: UUIDv4
 }

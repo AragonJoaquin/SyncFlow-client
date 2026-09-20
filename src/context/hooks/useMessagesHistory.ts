@@ -1,13 +1,29 @@
 import { useMemo } from 'react'
-import { useClientMessagesStore, useWorkGroupStore } from '@/store'
-import type { Channel, MessageClientStatus, Message } from '@/types'
+import { useClientMessagesStore, useWorkGroupStore, useOwnUserStore } from '@/store'
+import type { Channel, ClientMessageQueueItem, Message } from '@/types'
+
+export const CLIENT_OR_SERVER = {
+	SERVER: 'server',
+	CLIENT: 'client'
+} as const
+
+export type client_or_server_message =
+	| {
+			type: (typeof CLIENT_OR_SERVER)['SERVER']
+			message: Message
+	  }
+	| {
+			type: (typeof CLIENT_OR_SERVER)['CLIENT']
+			message: ClientMessageQueueItem
+	  }
 
 //TODO: optimize this
 export function useMessagesHistory(channelId: Channel['id'] | null) {
 	const categories = useWorkGroupStore((s) => s.categories)
 	const clientMessages = useClientMessagesStore((s) => s.getClientMessages(channelId ?? -1))
+	const user = useOwnUserStore((s) => s.user)
 
-	const history = useMemo(() => {
+	const history: client_or_server_message[] = useMemo(() => {
 		if (!channelId) return []
 
 		let serverMessages: Message[] = []
@@ -19,15 +35,13 @@ export function useMessagesHistory(channelId: Channel['id'] | null) {
 			break
 		}
 
-		const merged: MessageClientStatus[] = [
-			...serverMessages.map((m) => ({ message: m, status: undefined })),
-			...clientMessages.map((pcs) => ({ message: pcs.message, status: pcs.status }))
+		const merge = [
+			...serverMessages.map<client_or_server_message>((s) => ({ type: CLIENT_OR_SERVER.SERVER, message: s })),
+			...clientMessages.map<client_or_server_message>((s) => ({ type: CLIENT_OR_SERVER.CLIENT, message: s }))
 		]
 
-		merged.sort((a, b) => a.message.sent_at.getTime() - b.message.sent_at.getTime())
-
-		return merged
-	}, [categories, channelId, clientMessages])
+		return merge.sort((a, b) => a.message.sent_at.getTime() - b.message.sent_at.getTime())
+	}, [categories, channelId, clientMessages, user])
 
 	return history
 }
