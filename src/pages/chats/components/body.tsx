@@ -21,7 +21,7 @@ export function Body() {
 		return undefined
 	}, [categories, activeChannelId])
 
-	const messages = currentChannel?.messages ?? []
+	const messages = useMemo(() => currentChannel?.messages ?? [], [currentChannel])
 
 	useEffect(() => {
 		if (!messages.length) return
