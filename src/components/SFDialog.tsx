@@ -1,4 +1,4 @@
-import * as Dialog from '@radix-ui/react-dialog'
+import { Dialog } from 'radix-ui'
 import { useCallback, useState, type ReactNode } from 'react'
 import { SFButton } from './SFButton'
 import { SVGPlus } from './svgs'

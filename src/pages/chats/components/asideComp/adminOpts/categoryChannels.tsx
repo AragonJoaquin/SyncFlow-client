@@ -1,6 +1,6 @@
 import { SVGEdit, SVGTrash } from '@/components/svgs'
 import { useWorkGroupStore } from '@/store'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { DropdownMenu } from 'radix-ui'
 import { useShallow } from 'zustand/shallow'
 import { DeleteChannelModal } from './delete'
 import { EditChannelModal } from './edit'

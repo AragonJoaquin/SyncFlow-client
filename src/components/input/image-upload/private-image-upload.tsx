@@ -4,7 +4,7 @@ import { useFormContext } from 'react-hook-form'
 import { InputLabelStyles } from '..'
 import { FormMessageError } from '../form-message-error'
 import { AdjustImage } from './adjust-image'
-import { useImageUploaderContext } from './context'
+import { useImageUploaderContext } from './context.ts'
 import { Form } from 'radix-ui'
 
 export interface ImageUploaderProps {

@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { IMAGE_UPLOADER_CONTEXT } from './contex'
+import { IMAGE_UPLOADER_CONTEXT } from './context'
 
 export function ImageUploaderProvider({ children }: { children: ReactNode }) {
 	const [preview, setPreview] = useState<string>()

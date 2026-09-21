@@ -1,5 +1,5 @@
 import { APP_NAME } from '@/utils'
-import * as Tabs from '@radix-ui/react-tabs'
+import { Tabs } from 'radix-ui'
 import { LoginForm, RegisterForm } from './components'
 
 const TABS_PAGES = {

@@ -5,7 +5,7 @@ import { SVGChevronArrow } from '@/components/svgs'
 import { useWorkGroupStore, useToastStore } from '@/store'
 import type { FullWorkGroup, WorkGroup } from '@/types'
 import { debouncer } from '@/utils'
-import * as ScrollArea from '@radix-ui/react-scroll-area'
+import { ScrollArea } from 'radix-ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useShallow } from 'zustand/shallow'
 

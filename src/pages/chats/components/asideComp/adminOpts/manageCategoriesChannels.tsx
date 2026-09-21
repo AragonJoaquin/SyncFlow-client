@@ -1,6 +1,6 @@
 import { SVGChevronArrow, SVGEdit, SVGTrash } from '@/components/svgs'
 import { useWorkGroupStore } from '@/store'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { DropdownMenu } from 'radix-ui'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { CategoryChannels } from './categoryChannels'

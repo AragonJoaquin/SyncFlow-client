@@ -1,4 +1,4 @@
-import * as Collapsible from '@radix-ui/react-collapsible'
+import { Collapsible } from 'radix-ui'
 import { useState } from 'react'
 
 export function CollapsibleList({ name, children }: { name: string; children: React.ReactNode }) {

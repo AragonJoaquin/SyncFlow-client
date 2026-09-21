@@ -2,7 +2,7 @@ import { SFButton } from '@/components'
 import { Textarea, TextInput } from '@/components/input'
 import type { User } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as Form from '@radix-ui/react-form'
+import { Form } from 'radix-ui'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 import { z } from 'zod'
 

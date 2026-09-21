@@ -4,7 +4,7 @@ import { TextInput } from '@/components/input'
 import { useChatContext } from '@/context'
 import type { Channel } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as Form from '@radix-ui/react-form'
+import { Form } from 'radix-ui'
 import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
 

@@ -1,4 +1,4 @@
-import * as Form from '@radix-ui/react-form'
+import { Form } from 'radix-ui'
 import { cloneElement, isValidElement } from 'react'
 
 export function PopUpEdit({

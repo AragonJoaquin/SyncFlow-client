@@ -6,7 +6,7 @@ import type { Category, CategoryWithChannels, Channel } from '@/types'
 import { useMemo, useState } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { AdminOptions } from './adminOptions'
-import { AdminOptsProvider } from './adminOpts/context'
+import { AdminOptsProvider } from './adminOpts'
 
 const FALLBACK_NAME = 'No name' as const
 

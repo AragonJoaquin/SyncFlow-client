@@ -3,9 +3,9 @@ import { Cropper, type CropperRef } from 'react-advanced-cropper'
 import 'react-advanced-cropper/dist/style.css' // cropper styles
 import { SVGTrash } from '../../svgs'
 import { useFormContext } from 'react-hook-form'
-import { useImageUploaderContext } from './context'
 import { SFButton } from '@/components/SFButton'
 import { Dialog } from 'radix-ui'
+import { useImageUploaderContext } from './context'
 
 interface AdjustImageProps {
 	fieldName: string
