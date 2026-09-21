@@ -11,6 +11,7 @@
     "dist/**",
     "*.min.js",
     ".agents/**",
-    "node_modules/**"
+    "node_modules/**",
+    "*.json",
   ]
 }
