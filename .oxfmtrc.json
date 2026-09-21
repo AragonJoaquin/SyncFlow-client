@@ -7,5 +7,10 @@
   "trailingComma": "none",
   "useTabs": true,
   "sortPackageJson": false,
-  "ignorePatterns": []
+  "ignorePatterns": [
+    "dist/**",
+    "*.min.js",
+    ".agents/**",
+    "node_modules/**"
+  ]
 }
