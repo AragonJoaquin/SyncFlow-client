@@ -8,7 +8,11 @@
     "builtin": true
   },
   "ignorePatterns": [
-    "dist"
+    "dist/**",
+    ".agents/**",
+    "**/node_modules/**",
+    "**/*.d.ts",
+    "*.min.js"
   ],
   "overrides": [
     {
