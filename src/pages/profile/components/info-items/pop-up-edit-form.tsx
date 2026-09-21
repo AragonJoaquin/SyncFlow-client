@@ -10,7 +10,9 @@ export function PopUpEdit({
 	close: () => void
 	formId: string
 }) {
-	const childrenWithClose = isValidElement(children) ? cloneElement(children as React.ReactElement<{ close: () => void }>, { close }) : children
+	const childrenWithClose = isValidElement(children)
+		? cloneElement(children as React.ReactElement<{ close: () => void }>, { close })
+		: children
 
 	return (
 		<article className="absolute top-0 left-0 h-screen w-screen bg-black/50 flex items-center justify-center">

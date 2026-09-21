@@ -1,6 +1,6 @@
 import type { SVGInterface } from '.'
 
-export function SVGTrash({...props}: SVGInterface) {
+export function SVGTrash({ ...props }: SVGInterface) {
 	return (
 		<svg
 			width="24"
@@ -11,7 +11,7 @@ export function SVGTrash({...props}: SVGInterface) {
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
-            {...props}
+			{...props}
 		>
 			<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 			<path d="M4 7l16 0" />
