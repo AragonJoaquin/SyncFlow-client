@@ -16,5 +16,5 @@ export type ActivityGroup = {
 	started_at: Date
 	started_by: UUIDv4
 
-	body: any // TODO: define activity body type
+	body: unknown // TODO: define activity body type
 }

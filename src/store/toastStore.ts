@@ -40,18 +40,16 @@ export const useToastStore = create<ToastStore>((set) => ({
 			]
 		})),
 	addErrorToast: (t) => {
-		//very go styled
-		let toast: Omit<SFToast, 'id' | 'variant'> | null
-
-		t instanceof ErrorServer
-			? (toast = {
-					title: `${t.statusCode} - ${t.statusText}`,
-					description: t.message
-				})
-			: (toast = {
-					title: t?.title ?? UNKNOWN_TOAST_PROPS.title,
-					description: t?.description ?? UNKNOWN_TOAST_PROPS.description
-				})
+		const toast: Omit<SFToast, 'id' | 'variant'> | null =
+			t instanceof ErrorServer
+				? {
+						title: `${t.statusCode} - ${t.statusText}`,
+						description: t.message
+					}
+				: {
+						title: t?.title ?? UNKNOWN_TOAST_PROPS.title,
+						description: t?.description ?? UNKNOWN_TOAST_PROPS.description
+					}
 
 		set((s) => ({
 			...s,

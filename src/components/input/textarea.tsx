@@ -1,4 +1,4 @@
-import { Field, Label, Control } from '@radix-ui/react-form'
+import { Form } from 'radix-ui'
 import { useId } from 'react'
 import { useFormContext, type FieldError, type FieldErrorsImpl, type Merge, type UseFormReturn } from 'react-hook-form'
 import { INPUT_STYLINGS, type AVAILABLE_INPUT_STYLES } from '.'
@@ -13,8 +13,8 @@ type ITextarea = {
 	className?: string
 	fieldClassName?: string
 	rows?: number
-	error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>>
-	register?: UseFormReturn<any>['register']
+	error?: FieldError | Merge<FieldError, FieldErrorsImpl>
+	register?: UseFormReturn['register']
 }
 
 export function Textarea({
@@ -31,27 +31,27 @@ export function Textarea({
 	const {
 		register,
 		formState: { errors }
-	} = useFormContext<Record<typeof inputName, any>>()
+	} = useFormContext<Record<typeof inputName, unknown>>()
 
 	const registerFn = registerProp ?? register
 	const error = errorProp ?? errors[inputName as keyof typeof errors]
 
 	const id = useId()
 	return (
-		<Field className={`flex flex-col ${fieldClassName}`} {...registerFn(inputName)}>
-			<Label className={InputLabelStyles} htmlFor={id}>
+		<Form.Field className={`flex flex-col ${fieldClassName}`} {...registerFn(inputName)}>
+			<Form.Label className={InputLabelStyles} htmlFor={id}>
 				{label}
-			</Label>
-			<Control asChild>
+			</Form.Label>
+			<Form.Control asChild>
 				<textarea
 					className={`${INPUT_STYLINGS[styling]} ${className} focus:outline-none focus:ring-2 focus:ring-primaryText/30 focus:border-primaryText transition-all duration-200 resize-y`}
 					id={id}
 					placeholder={placeholder}
 					rows={rows}
 				/>
-			</Control>
+			</Form.Control>
 
 			{error !== undefined && <FormMessageError error={error} />}
-		</Field>
+		</Form.Field>
 	)
 }

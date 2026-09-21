@@ -32,7 +32,7 @@ export function PinnedMessagesPanel() {
 				setPinnedMessages(res?.data ?? [])
 			})
 			.finally(() => setIsLoading(false))
-	}, [workGroup?.id])
+	}, [workGroup?.id, getMethod])
 
 	const setSearchInputVal = useCallback((val: string) => setSearch(val), [])
 

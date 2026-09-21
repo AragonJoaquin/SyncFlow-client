@@ -1,26 +1,7 @@
-import { useAnyContext } from '@/context'
-import { createContext, useCallback, useMemo, type ReactNode } from 'react'
+import { useCallback, useMemo, type ReactNode } from 'react'
 import { AXIOS_METHODS, type axios_config, type axios_data, type axios_route } from './axios_helper'
-import { useAxiosInternalFetch, type return_axios_internal_fetch } from './axiosInstance'
-
-type returnFunc = <T extends any>(
-	route: axios_route,
-	data?: axios_data,
-	conf?: axios_config<any>
-) => return_axios_internal_fetch<T>
-
-interface IAxios {
-	get: <T extends any>(
-		route: Parameters<returnFunc>['0'],
-		conf?: Parameters<returnFunc>['2']
-	) => return_axios_internal_fetch<T>
-	post: returnFunc
-	delete: returnFunc
-	put: returnFunc
-	patch: returnFunc
-}
-
-const AXIOS_CONTEXT = createContext<IAxios | undefined>(undefined)
+import { useAxiosInternalFetch } from './axiosInstance'
+import { AXIOS_CONTEXT } from './context'
 
 //NOTE: yes, this is a hidden context painted as a hook
 // then why is it here? its better to think its a hook rather a context because
@@ -32,31 +13,31 @@ export function AxiosProvider({ children }: { children: ReactNode }) {
 
 	// i could make a reducer... but i dont want to :)
 	const axiosGet = useCallback(
-		async <T extends any>(route: axios_route, conf?: axios_config<any>) =>
+		async <T,>(route: axios_route, conf?: axios_config<unknown>) =>
 			await axios_fetch<T>(route, undefined, AXIOS_METHODS.GET, conf),
 		[axios_fetch]
 	)
 
 	const axiosPost = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
+		async <T,>(route: axios_route, data?: axios_data, conf?: axios_config<unknown>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.POST, conf),
 		[axios_fetch]
 	)
 
 	const axiosPatch = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
+		async <T,>(route: axios_route, data?: axios_data, conf?: axios_config<unknown>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.PATCH, conf),
 		[axios_fetch]
 	)
 
 	const axiosPut = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
+		async <T,>(route: axios_route, data?: axios_data, conf?: axios_config<unknown>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.PUT, conf),
 		[axios_fetch]
 	)
 
 	const axiosDelete = useCallback(
-		async <T extends any>(route: axios_route, data?: axios_data, conf?: axios_config<any>) =>
+		async <T,>(route: axios_route, data?: axios_data, conf?: axios_config<unknown>) =>
 			await axios_fetch<T>(route, data, AXIOS_METHODS.DELETE, conf),
 		[axios_fetch]
 	)
@@ -74,6 +55,3 @@ export function AxiosProvider({ children }: { children: ReactNode }) {
 
 	return <AXIOS_CONTEXT.Provider value={contextValue}>{children}</AXIOS_CONTEXT.Provider>
 }
-
-//NOTE: it should say "useAxiosContext"... but i prefer this way... to keep the abstraction simple
-export const useAxios = () => useAnyContext(AXIOS_CONTEXT)

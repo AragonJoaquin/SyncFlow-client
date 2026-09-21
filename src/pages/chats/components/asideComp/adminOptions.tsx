@@ -1,7 +1,7 @@
 import { SFButton } from '@/components'
 import { SVGCirclePlus } from '@/components/svgs'
 import { useCacheUsersStore, useOwnUserStore } from '@/store'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { DropdownMenu } from 'radix-ui'
 import { useShallow } from 'zustand/shallow'
 import { ROLE_TYPES_ENUM } from '../constants'
 import { ADMIN_MODALS_OPEN, useAdminOptsContext } from './adminOpts/context'

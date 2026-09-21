@@ -1,15 +1,15 @@
-import { Message } from '@radix-ui/react-form'
+import { Form } from 'radix-ui'
 import type { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form'
 
 interface IFormMessageError {
-	error: FieldError | Merge<FieldError, FieldErrorsImpl<any>>
+	error: FieldError | Merge<FieldError, FieldErrorsImpl>
 }
 
 export function FormMessageError({ error }: IFormMessageError) {
 	return (
 		<>
 			{error?.message && (
-				<Message className="text-xs text-error mt-1.5 flex items-center gap-1">
+				<Form.Message className="text-xs text-error mt-1.5 flex items-center gap-1">
 					<svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
 						<path
 							fillRule="evenodd"
@@ -18,7 +18,7 @@ export function FormMessageError({ error }: IFormMessageError) {
 						/>
 					</svg>
 					{error.message.toString()}
-				</Message>
+				</Form.Message>
 			)}
 		</>
 	)

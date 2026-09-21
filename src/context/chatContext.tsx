@@ -41,7 +41,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 			SET_CHANNEL_SEARCHED.add(channel_id)
 			setMoreMsgs(channel_id, res.data?.messages ?? [], res.data?.has_more ?? true, pagination)
 		},
-		[channelPagination.get, get, setMoreMsgs]
+		[channelPagination, get, setMoreMsgs]
 	)
 
 	return (

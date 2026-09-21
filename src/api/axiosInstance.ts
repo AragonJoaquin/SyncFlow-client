@@ -24,7 +24,7 @@ export function useAxiosInternalFetch() {
 			route: axios_route,
 			data: axios_data | undefined,
 			met: axios_avail_methods,
-			cfg?: axios_config<any>
+			cfg?: axios_config<unknown>
 		): return_axios_internal_fetch<T> => {
 			const c = { ...default_axios_config, ...cfg }
 

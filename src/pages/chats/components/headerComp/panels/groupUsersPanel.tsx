@@ -47,7 +47,7 @@ export function GroupUsersPanel() {
 
 			return acc
 		}, [])
-	}, [filtered])
+	}, [filtered, users.length])
 
 	//count the total to then display it
 	const totalMembers = useMemo(() => users.length, [users])

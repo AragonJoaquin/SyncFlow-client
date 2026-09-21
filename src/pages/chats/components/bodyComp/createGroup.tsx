@@ -5,7 +5,7 @@ import { useWorkGroupStore } from '@/store'
 import type { FullWorkGroup } from '@/types'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as Form from '@radix-ui/react-form'
+import { Form } from 'radix-ui'
 import { useId } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -52,10 +52,11 @@ export function CreateGroupForm() {
 
 		const formData = new FormData()
 
-		for (const k in e)
-			(k as (typeof FIELD_NAMES)[keyof typeof FIELD_NAMES]) === FIELD_NAMES.PICTURE
-				? formData.append(k, file ? file?.slice() : new Blob())
-				: formData.append(k, e[k as keyof Omit<typeof e, typeof FIELD_NAMES.PICTURE>] as string)
+		for (const k in e) {
+			if ((k as (typeof FIELD_NAMES)[keyof typeof FIELD_NAMES]) === FIELD_NAMES.PICTURE)
+				formData.append(k, file ? file?.slice() : new Blob())
+			else formData.append(k, e[k as keyof Omit<typeof e, typeof FIELD_NAMES.PICTURE>] as string)
+		}
 
 		const { data: res } = await post<FullWorkGroup>('/work_group', formData)
 		if (res.error) return

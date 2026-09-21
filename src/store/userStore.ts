@@ -11,7 +11,7 @@ interface UserStore {
 }
 
 //NOTE: this store can be merged with the cacheUsers...
-export const useOwnUserStore = create<UserStore>()((set, _) => ({
+export const useOwnUserStore = create<UserStore>()((set) => ({
 	user: null,
 
 	login: (user) => set({ user }),
@@ -39,7 +39,7 @@ export const useCacheUsersStore = create<CacheUsersStore>((set, get) => ({
 		if (!groupId) return usersInGroup
 
 		get().users?.forEach((val) => {
-			val.membership.group_id === groupId && usersInGroup.push(val)
+			if (val.membership.group_id === groupId) usersInGroup.push(val)
 		})
 		return usersInGroup
 	},

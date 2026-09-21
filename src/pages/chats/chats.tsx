@@ -27,13 +27,13 @@ export function ChatPage() {
 			if (!data || data.error) return
 			addWorkGroup(data?.data)
 		})
-	}, [])
+	}, [addWorkGroup, get])
 
 	useEffect(() => {
 		if (!activeId) return
 		const store = useWorkGroupStore.getState()
 		if (!store.isChannelFetched(activeId)) loadMoreMessages(activeId)
-	}, [activeId])
+	}, [activeId, loadMoreMessages])
 
 	return (
 		<section className="flex flex-row w-full h-full max-h-screen overflow-hidden">

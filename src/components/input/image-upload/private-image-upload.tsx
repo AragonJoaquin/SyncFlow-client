@@ -1,11 +1,11 @@
 import { ACCEPTED_IMAGE_TYPES } from '@/utils'
-import { Field, Label, Control, Message } from '@radix-ui/react-form'
 import { useRef, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { InputLabelStyles } from '..'
 import { FormMessageError } from '../form-message-error'
 import { AdjustImage } from './adjust-image'
 import { useImageUploaderContext } from './context'
+import { Form } from 'radix-ui'
 
 export interface ImageUploaderProps {
 	fieldName: string
@@ -20,7 +20,7 @@ export const PrivateImageUploader = ({ fieldName, label, enableCrop = false }: I
 		register,
 		setValue,
 		formState: { errors }
-	} = useFormContext<Record<typeof fieldName, any>>()
+	} = useFormContext<Record<typeof fieldName, FileList | null>>()
 
 	const { preview, setPreview } = useImageUploaderContext()
 
@@ -38,12 +38,14 @@ export const PrivateImageUploader = ({ fieldName, label, enableCrop = false }: I
 			const reader = new FileReader()
 			reader.onloadend = () => setPreview(reader?.result as string)
 			reader.readAsDataURL(file)
-		} catch {}
+		} catch {
+			return
+		}
 	}
 
 	return (
-		<Field className="grid mb-4" name={fieldName}>
-			<Label className={`${InputLabelStyles} mb-0! pb-0! text-center`}>{label}</Label>
+		<Form.Field className="grid mb-4" name={fieldName}>
+			<Form.Label className={`${InputLabelStyles} mb-0! pb-0! text-center`}>{label}</Form.Label>
 
 			<div
 				role="button"
@@ -63,7 +65,7 @@ export const PrivateImageUploader = ({ fieldName, label, enableCrop = false }: I
           transition-colors cursor-pointer aspect-square size-60 max-h-60 max-w-60
         ${isDragging ? 'border-neutral-100 bg-neutral-600/70' : 'border-neutral-300 hover:border-neutral-400'}`}
 			>
-				<Control asChild>
+				<Form.Control asChild>
 					<input
 						type="file"
 						disabled={!!preview}
@@ -73,14 +75,14 @@ export const PrivateImageUploader = ({ fieldName, label, enableCrop = false }: I
 						{...register(fieldName)}
 						ref={(e) => {
 							register(fieldName).ref(e)
-							;(fileInputRef as any).current = e
+							fileInputRef.current = e
 						}}
 						onChange={(e) => {
 							register(fieldName).onChange(e)
 							handleFiles(e.target.files)
 						}}
 					/>
-				</Control>
+				</Form.Control>
 
 				{!preview ? (
 					<span className="text-neutral-400 w-full h-full flex justify-center items-center text-sm text-center p-10">
@@ -91,10 +93,12 @@ export const PrivateImageUploader = ({ fieldName, label, enableCrop = false }: I
 				)}
 			</div>
 			<span className="mt-1 flex text-center w-full justify-center items-baseline">
-				<Message className="text-xs text-neutral-400">{preview ? 'Click to change' : 'PNG, JPG up to 10MB'}</Message>
+				<Form.Message className="text-xs text-neutral-400">
+					{preview ? 'Click to change' : 'PNG, JPG up to 10MB'}
+				</Form.Message>
 			</span>
 
 			{error && <FormMessageError error={error} />}
-		</Field>
+		</Form.Field>
 	)
 }

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useClientMessagesStore, useWorkGroupStore, useOwnUserStore } from '@/store'
+import { useClientMessagesStore, useWorkGroupStore } from '@/store'
 import type { Channel, ClientMessageQueueItem, Message } from '@/types'
 
 export const CLIENT_OR_SERVER = {
@@ -21,7 +21,6 @@ export type client_or_server_message =
 export function useMessagesHistory(channelId: Channel['id'] | null) {
 	const categories = useWorkGroupStore((s) => s.categories)
 	const clientMessages = useClientMessagesStore((s) => s.getClientMessages(channelId ?? -1))
-	const user = useOwnUserStore((s) => s.user)
 
 	const history: client_or_server_message[] = useMemo(() => {
 		if (!channelId) return []
@@ -41,7 +40,7 @@ export function useMessagesHistory(channelId: Channel['id'] | null) {
 		]
 
 		return merge.sort((a, b) => a.message.sent_at.getTime() - b.message.sent_at.getTime())
-	}, [categories, channelId, clientMessages, user])
+	}, [categories, channelId, clientMessages])
 
 	return history
 }

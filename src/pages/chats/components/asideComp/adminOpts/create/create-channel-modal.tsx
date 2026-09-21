@@ -3,7 +3,7 @@ import { SFButton, SFCustomDialog } from '@/components'
 import { SelectInputField, TextInput } from '@/components/input'
 import { useWorkGroupStore } from '@/store'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as Form from '@radix-ui/react-form'
+import { Form } from 'radix-ui'
 import { useId, useMemo } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -24,11 +24,12 @@ const zodSchema = z.object({
 		.transform((val) => Number(val))
 })
 
-type ChannelFormData = z.infer<typeof zodSchema>
+type FormInput = z.input<typeof zodSchema> // { channel_name: string; category_id: string }
+type FormOutput = z.output<typeof zodSchema> // { channel_name: string; category_id: number }
 
 export function CreateChannelModal() {
-	const { handleSubmit, setError, ...methods } = useForm<ChannelFormData>({
-		resolver: zodResolver(zodSchema) as any, // i dont care anymore
+	const { handleSubmit, setError, ...methods } = useForm<FormInput, unknown, FormOutput>({
+		resolver: zodResolver(zodSchema),
 		mode: 'onChange'
 	})
 
@@ -39,7 +40,7 @@ export function CreateChannelModal() {
 
 	const label_category = useId()
 
-	const onSubmit = (data: ChannelFormData) => {
+	const onSubmit = (data: FormOutput) => {
 		if (!websocket?.CHAT_SOCKET) return
 
 		if (getChannelByName(data[FIELD_NAMES.NAME]) != undefined)

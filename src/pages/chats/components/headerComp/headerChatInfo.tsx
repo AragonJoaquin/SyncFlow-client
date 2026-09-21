@@ -38,13 +38,13 @@ export function HeaderChatInfo() {
 	const LeaveGroup = useCallback(async () => {
 		try {
 			if (!workGroup?.id) return
-			websocket.CHAT_SOCKET.sendPayload<{ group_id: number }>(WS_ACTIONS.WS_QUIT_GROUP, { group_id: workGroup?.id! })
-		} catch (e) {
-			e instanceof ErrorServer ? addErrorToast(e) : addErrorToast()
+			websocket.CHAT_SOCKET.sendPayload<{ group_id: number }>(WS_ACTIONS.WS_QUIT_GROUP, { group_id: workGroup?.id })
+		} catch (e: unknown) {
+			return e instanceof ErrorServer ? addErrorToast(e) : addErrorToast()
 		}
-	}, [workGroup?.id])
+	}, [workGroup?.id, addErrorToast, websocket.CHAT_SOCKET])
 
-	const AboutThisGroup = useCallback(() => {}, [workGroup])
+	const AboutThisGroup = useCallback(() => {}, [])
 
 	const ELEMENTS_DD: Parameters<typeof SFDropDown>[0]['elements'] = {
 		General: [

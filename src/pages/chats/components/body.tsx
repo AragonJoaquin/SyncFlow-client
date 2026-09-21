@@ -40,7 +40,8 @@ export function Body() {
 			const isConsecutive = result[result.length - 1]?.message.message.sender_id === m.message.sender_id
 
 			const showAvatar = !(isConsecutive && currentChainLength < CHAIN_THRESHOLD)
-			!showAvatar ? currentChainLength++ : (currentChainLength = 0)
+			if (!showAvatar) currentChainLength++
+			else currentChainLength = 0
 
 			result.push({ message: m, sender: getUser(m.message.sender_id)?.user, showAvatar })
 		})

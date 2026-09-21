@@ -5,14 +5,14 @@ import { SVGTrash } from '../../svgs'
 import { useFormContext } from 'react-hook-form'
 import { useImageUploaderContext } from './context'
 import { SFButton } from '@/components/SFButton'
-import * as Dialog from '@radix-ui/react-dialog'
+import { Dialog } from 'radix-ui'
 
 interface AdjustImageProps {
 	fieldName: string
 }
 
 export function AdjustImage({ fieldName }: AdjustImageProps) {
-	const { setValue, getValues } = useFormContext<Record<typeof fieldName, any>>()
+	const { setValue, getValues } = useFormContext<Record<typeof fieldName, unknown>>()
 	const { preview, setPreview, setIsModalOpen, isModalOpen } = useImageUploaderContext()
 
 	const cropperRef = useRef<CropperRef>(null)

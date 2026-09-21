@@ -1,15 +1,5 @@
-import { useAnyContext } from '@/context'
-import { createContext, useMemo, useState, type ReactNode } from 'react'
-
-interface IImageUploader {
-	preview: string | undefined
-	setPreview: (s: string | undefined) => void
-
-	isModalOpen: boolean
-	setIsModalOpen: (s: boolean) => void
-}
-
-export const IMAGE_UPLOADER_CONTEXT = createContext<IImageUploader | undefined>(undefined)
+import { useMemo, useState, type ReactNode } from 'react'
+import { IMAGE_UPLOADER_CONTEXT } from './contex'
 
 export function ImageUploaderProvider({ children }: { children: ReactNode }) {
 	const [preview, setPreview] = useState<string>()
@@ -27,5 +17,3 @@ export function ImageUploaderProvider({ children }: { children: ReactNode }) {
 
 	return <IMAGE_UPLOADER_CONTEXT.Provider value={val}>{children}</IMAGE_UPLOADER_CONTEXT.Provider>
 }
-
-export const useImageUploaderContext = () => useAnyContext<IImageUploader>(IMAGE_UPLOADER_CONTEXT)

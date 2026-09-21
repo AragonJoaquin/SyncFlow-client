@@ -1,7 +1,7 @@
 import { useAxios } from '@/api'
 import { useOwnUserStore } from '@/store/userStore.ts'
 import type { User } from '@/types'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { GLOBAL_CONTEXT } from './globalContext.ts'
 
@@ -10,12 +10,13 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 	const { setUser } = useOwnUserStore(useShallow((s) => ({ setUser: s.setUser })))
 
 	const [isPending, setIsPending] = useState<boolean>(false)
+	const fetchedRef = useRef(false)
 
 	// TODO: implement this
 	//const [theme, setTheme] = useState<"light" | "dark">("dark")
 
 	useEffect(() => {
-		if (isPending) return
+		if (isPending || fetchedRef.current) return
 
 		setIsPending(true)
 		get<User>('/user/get_own', { silent: true })
@@ -23,8 +24,11 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 				if (res.error) return
 				setUser(res.data)
 			})
-			.finally(() => setIsPending(false))
-	}, [])
+			.finally(() => {
+				fetchedRef.current = true
+				setIsPending(false)
+			})
+	}, [get, setUser, isPending])
 
 	return (
 		<GLOBAL_CONTEXT.Provider

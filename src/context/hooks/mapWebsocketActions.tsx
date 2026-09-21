@@ -89,6 +89,7 @@ export function useWebsocketActions() {
 		} as const
 
 		return MAP_ACTIONS
+		// oxlint-disable-next-line react-hooks/exhaustive-deps
 	}, [workGroup, user])
 
 	return IndexWSActions

@@ -44,13 +44,13 @@ export function useWebsocket() {
 			if (!func) return
 
 			//TODO: fix this ... Parameters<> wont work
-			;(func as (data: any) => void)(res?.data)
+			;(func as (data: unknown) => void)(res?.data)
 		})
 
 		return () => {
 			socket.closeConnection()
 		}
-	}, [socket])
+	}, [socket, WS_MAPPED_ACTIONS, addErrorToast])
 
 	return socket!
 }

@@ -46,12 +46,12 @@ export const AXIOS_METHODS = {
 export type axios_avail_methods = (typeof AXIOS_METHODS)[keyof typeof AXIOS_METHODS]
 export type axios_data = Record<string, unknown> | FormData
 export type axios_route = `/${string}`
-export type axios_config<T extends any> = {
+export type axios_config<T> = {
 	axios_conf?: AxiosRequestConfig<T>
 	silent?: boolean
 }
 
-export const default_axios_config: axios_config<any> = {
+export const default_axios_config: axios_config<unknown> = {
 	axios_conf: {},
 	silent: false
 }
