@@ -58,9 +58,10 @@ export const useToastStore = create<ToastStore>((set) => ({
 				{
 					...toast,
 					variant: 'error',
-					id: s.lastToastId + 1
+					id: s.lastToastId
 				}
-			]
+			],
+			lastToastId: s.lastToastId + 1
 		}))
 	},
 	addSuccessToast: (t) => {
@@ -76,13 +77,15 @@ export const useToastStore = create<ToastStore>((set) => ({
 				...s.toasts,
 				{
 					...toast,
-					id: s.lastToastId + 1
+					id: s.lastToastId
 				}
-			]
+			],
+			lastToastId: s.lastToastId + 1
 		}))
 	},
 	removeToast: (id) =>
 		set((s) => ({
+			...s,
 			toasts: s.toasts.filter((t) => t.id !== id)
 		}))
 }))

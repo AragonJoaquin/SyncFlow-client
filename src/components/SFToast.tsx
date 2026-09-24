@@ -63,20 +63,20 @@ export function SFToastRoot() {
 			{toasts.map((t) => {
 				return <SFToastItem {...t} key={t.id} />
 			})}
-			<Toast.Viewport className="fixed bottom-0 right-0 flex flex-col gap-2 p-4 w-[390px] max-w-[100vw] list-none z-100 outline-none" />
+			<Toast.Viewport className="fixed bottom-0 right-0 flex flex-col gap-2 p-4 w-[390px] max-w-[100vw] list-none outline-none z-[999]!" />
 		</Toast.Provider>
 	)
 }
 
 export function SFToastItem({ id, title, description, variant }: SFToast) {
 	const removeToast = useToastStore(useShallow((e) => e.removeToast))
+	console.log('toast id: ', id)
+
 	return (
 		<Toast.Root
-			className={`grid grid-cols-[auto_1fr_auto] items-start gap-x-3 rounded-lg border p-4 shadow-lg data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out ${VARIANT_STYLES[variant]}`}
+			className={`grid grid-cols-[auto_1fr_auto] items-start gap-x-3 rounded-lg border p-4 shadow-lg data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out ${VARIANT_STYLES[variant]} backdrop-blur-xl`}
 			onOpenChange={(open) => {
-				if (!open) {
-					removeToast(id)
-				}
+				if (!open) removeToast(id)
 			}}
 		>
 			<span className="mt-0.5">{VARIANT_ICONS[variant]}</span>

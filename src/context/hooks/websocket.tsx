@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
 import { useGetWebsocketInstance } from './useGetWebsocketInstance'
+import { ErrorServer } from '@/api/axios_helper'
 
 export function useWebsocket() {
 	const WS_MAPPED_ACTIONS = useWebsocketActions()
@@ -36,7 +37,7 @@ export function useWebsocket() {
 
 		socket.onMessage((ev) => {
 			const res = ev.data
-			if (res.error) console.warn('error message: ', ev.data.data)
+			if (res.error) return addErrorToast(new ErrorServer({ error_message: res.message }, undefined, 'WEBSOCKET ERROR'))
 			const map_actions = WS_MAPPED_ACTIONS_REF.current()
 
 			const action = ev?.data?.ws_handler
@@ -49,7 +50,7 @@ export function useWebsocket() {
 		return () => {
 			socket.closeConnection()
 		}
-	}, [socket])
+	}, [socket, addErrorToast])
 
 	return socket!
 }
