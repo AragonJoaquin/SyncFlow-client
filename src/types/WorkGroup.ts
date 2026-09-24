@@ -1,4 +1,4 @@
-import type { CategoryWithChannels, FileRepo, GroupMemberWithProfile, UUIDv4 } from '.'
+import type { CategoryWithChannels, FileRepo, GroupMemberWithProfile, PinnedMessage, UUIDv4 } from '.'
 
 export type WorkGroup = {
 	id: number
@@ -35,4 +35,5 @@ export type FullWorkGroup = {
 	file_repo: FileRepo | null
 	category: CategoryWithChannels[]
 	users: GroupMemberWithProfile[]
+	pinned_messages: PinnedMessage[]
 }

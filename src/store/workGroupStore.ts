@@ -1,4 +1,15 @@
-import type { Category, CategoryWithChannels, Channel, FileRepo, FullWorkGroup, Message, WorkGroup } from '@/types'
+import {
+	MessageRaw_To_Message,
+	type Category,
+	type CategoryWithChannels,
+	type Channel,
+	type FileRepo,
+	type FullWorkGroup,
+	type Message,
+	type MessageRaw,
+	type PinnedMessage,
+	type WorkGroup
+} from '@/types'
 import { create } from 'zustand'
 import { UNDEFINED_ID } from './constants'
 import { useCacheUsersStore } from './userStore'
@@ -33,11 +44,16 @@ interface WorkGroupStore {
 	getChannelByName: (name: string, catId?: Category['id']) => Channel | undefined
 
 	// messages
-	addMessage: (channel_id: channel_id, message: Message) => void
+	addMessage: (channel_id: channel_id, message: MessageRaw) => void
 	removeMessage: (channel_id: channel_id, message_id: message_id) => void
 	getMessage: (channel_id: channel_id, message_id: message_id) => [Channel | undefined, Message | undefined]
 	getMessageIndex: (channel_id: channel_id, message_id: message_id) => number
 	setMessages: (channel_id: channel_id, messages: Message[], hasMore: boolean) => void
+
+	// pinnedMessages
+	pinnedMessages: PinnedMessage[]
+	addPinnedMessages(p: PinnedMessage[]): void
+	getPinnedMessages(): PinnedMessage[]
 
 	// channel fetching tracking
 	fetchedChannels: Set<channel_id>
@@ -50,7 +66,7 @@ interface WorkGroupStore {
 	//extras
 	setMoreMessages: (
 		channel_id: channel_id,
-		messages: Message[],
+		messages: MessageRaw[],
 		has_more: boolean,
 		pagination?: pagination_type
 	) => void
@@ -68,6 +84,7 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 	categories: new Map(),
 	groupImage: null,
 	activeChannel: null,
+	pinnedMessages: [],
 
 	//NOTE: wk
 	addWorkGroup: (wk) => {
@@ -79,7 +96,13 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 				catMap.set(cat.id, cat)
 			})
 
-			return { ...s, workGroup: wk?.work_group, groupImage: wk?.file_repo, categories: catMap }
+			return {
+				...s,
+				workGroup: wk?.work_group,
+				groupImage: wk?.file_repo,
+				categories: catMap,
+				pinnedMessages: wk?.pinned_messages ?? []
+			}
 		})
 	},
 	removeWorkGroup: () => set((s) => ({ ...s, workGroup: null })),
@@ -162,7 +185,7 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 	},
 
 	//NOTE: Messages utils
-	addMessage: (channel_id: channel_id, message: Message) => {
+	addMessage: (channel_id, message) => {
 		const channel = get().getChannel(channel_id)
 		if (!channel) return
 
@@ -179,7 +202,7 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 					ch.id === channel_id
 						? {
 								...channel,
-								messages: [...(channel?.messages ?? []), message]
+								messages: [...(channel?.messages ?? []), MessageRaw_To_Message(message)]
 							}
 						: ch
 				)
@@ -228,6 +251,10 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 		if (!channel) return -1
 		return channel.messages.findIndex((msg) => msg.id === message_id)
 	},
+
+	//NOTE: pinnedMessages
+	addPinnedMessages: (p) => set((s) => ({ ...s, pinnedMessages: [...s.pinnedMessages, ...p] })),
+	getPinnedMessages: () => get().pinnedMessages,
 
 	//NOTE: Channel fetching tracking
 	fetchedChannels: new Set<channel_id>(),
@@ -278,11 +305,13 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 		const category = categories.get(channel.category_id)
 		if (!category) return
 
+		const messages_parsed: Message[] = messages?.map((a) => MessageRaw_To_Message(a))
+
 		set((s) => ({
 			...s,
 			fetchedChannels: new Set(s.fetchedChannels).add(channel_id),
 			channelPagination: new Map(s.channelPagination).set(channel_id, {
-				offset: pagination.offset + messages.length,
+				offset: pagination.offset + messages_parsed.length,
 				hasMore: has_more
 			}),
 			categories: new Map(categories).set(category.id, {
@@ -291,7 +320,7 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 					ch.id === channel_id
 						? {
 								...channel,
-								messages: [...(channel?.messages ?? []), ...messages]
+								messages: [...(channel?.messages ?? []), ...messages_parsed]
 							}
 						: ch
 				)

@@ -14,6 +14,17 @@ export type Message = {
 	file_id: UUIDv4 | null
 }
 
+export type MessageRaw = Message & {
+	sent_at: string
+	last_modified: string | null
+}
+
+export const MessageRaw_To_Message = (m: MessageRaw): Message => ({
+	...m,
+	sent_at: new Date(m.sent_at ?? ''),
+	last_modified: m.last_modified ? new Date(m.last_modified) : null
+})
+
 export type MessageReaction = {
 	user_id: UUIDv4
 	message_id: number

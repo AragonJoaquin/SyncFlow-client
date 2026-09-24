@@ -1,6 +1,6 @@
 import { useAxios } from '@/api'
 import { useWorkGroupStore } from '@/store'
-import type { Channel, Message } from '@/types'
+import type { Channel, MessageRaw } from '@/types'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { CHAT_CONTEXT, type all_side_pannels } from './chatContext'
@@ -32,7 +32,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 			const pagination = channelPagination.get(channel_id) ?? { offset: 0, hasMore: true }
 			if (!pagination.hasMore) return
 
-			const { data: res } = await get<{ messages: Message[]; has_more: boolean }>(
+			const { data: res } = await get<{ messages: MessageRaw[]; has_more: boolean }>(
 				`/channel/${channel_id}/messages?limit=50&offset=${pagination.offset}`
 			)
 

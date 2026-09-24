@@ -1,38 +1,15 @@
-import { useAxios } from '@/api'
 import { SFAvatarImage } from '@/components'
 import { SVGPin } from '@/components/svgs'
 import { SIDE_PANNELS_STATE } from '@/context/chatContext'
-import { useWorkGroupStore } from '@/store'
-import type { PinnedMessage } from '@/types'
 import { FormatRelativeTime } from '@/utils'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useShallow } from 'zustand/shallow'
+import { useCallback, useMemo, useState } from 'react'
 import { PannelWrapper } from './panelWrapper'
+import { useWorkGroupStore } from '@/store'
+import { useShallow } from 'zustand/shallow'
 
 export function PinnedMessagesPanel() {
 	const [search, setSearch] = useState('')
-	const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([])
-	const [isLoading, setIsLoading] = useState(true)
-
-	const { workGroup } = useWorkGroupStore(
-		useShallow((s) => ({
-			workGroup: s.workGroup
-		}))
-	)
-
-	const { get: getMethod } = useAxios()
-
-	useEffect(() => {
-		if (!workGroup?.id) return
-
-		setIsLoading(true)
-		getMethod<PinnedMessage[]>(`/work_group/${workGroup.id}/pinned-messages`, undefined)
-			.then(({ data: res }) => {
-				if (res.error) return
-				setPinnedMessages(res?.data ?? [])
-			})
-			.finally(() => setIsLoading(false))
-	}, [workGroup?.id, getMethod])
+	const pinnedMessages = useWorkGroupStore(useShallow((s) => s.pinnedMessages))
 
 	const setSearchInputVal = useCallback((val: string) => setSearch(val), [])
 
@@ -55,11 +32,7 @@ export function PinnedMessagesPanel() {
 			SVGElement={SVGPin}
 			setSearchInputValue={setSearchInputVal}
 		>
-			{isLoading ? (
-				<div className="flex items-center justify-center py-12">
-					<div className="animate-spin w-6 h-6 border-2 border-neutral-500 border-t-transparent rounded-full" />
-				</div>
-			) : !filtered.length ? (
+			{!filtered.length ? (
 				<div className="flex flex-col items-center justify-center py-12 text-center">
 					<SVGPin className="w-12 h-12 text-neutral-600 mb-3" />
 					<p className="text-unfocused font-OpenSans text-sm">
