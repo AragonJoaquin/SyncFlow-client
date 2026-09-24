@@ -70,18 +70,18 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 	activeChannel: null,
 
 	//NOTE: wk
-	addWorkGroup: (wk) =>
+	addWorkGroup: (wk) => {
+		useCacheUsersStore.getState().addMultipleUsers(wk.users)
 		set((s) => {
 			const categories = wk?.category ?? []
 			const catMap = new Map<Category['id'], CategoryWithChannels>()
-
-			useCacheUsersStore.getState().addMultipleUsers(wk.users)
 			categories?.forEach((cat) => {
 				catMap.set(cat.id, cat)
 			})
 
 			return { ...s, workGroup: wk?.work_group, groupImage: wk?.file_repo, categories: catMap }
-		}),
+		})
+	},
 	removeWorkGroup: () => set((s) => ({ ...s, workGroup: null })),
 
 	///NOTE: Categories
@@ -280,6 +280,7 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 
 		set((s) => ({
 			...s,
+			fetchedChannels: new Set(s.fetchedChannels).add(channel_id),
 			channelPagination: new Map(s.channelPagination).set(channel_id, {
 				offset: pagination.offset + messages.length,
 				hasMore: has_more

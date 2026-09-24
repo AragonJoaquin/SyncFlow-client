@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "pnpx react-doctor@latest"
   },
   "dependencies": {
     "@hookform/resolvers": "~5.2.2",

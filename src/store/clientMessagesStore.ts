@@ -36,8 +36,8 @@ export const useClientMessagesStore = create<ClientMessagesStore>((set, get) => 
 	},
 
 	removeClientMessage: (channelId, tempId) => {
+		const c = get().getClientMessages(channelId)
 		set((s) => {
-			const c = get().getClientMessages(channelId)
 			if (!c) return s
 
 			const filtered = c.filter((m) => m.tempId !== tempId)

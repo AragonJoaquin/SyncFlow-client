@@ -1,11 +1,13 @@
 import { useOwnUserStore, useToastStore } from '@/store'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
 import { useGetWebsocketInstance } from './useGetWebsocketInstance'
 
 export function useWebsocket() {
 	const WS_MAPPED_ACTIONS = useWebsocketActions()
+	const WS_MAPPED_ACTIONS_REF = useRef(WS_MAPPED_ACTIONS)
+	WS_MAPPED_ACTIONS_REF.current = WS_MAPPED_ACTIONS
 
 	const { addErrorToast } = useToastStore(
 		useShallow((s) => ({
@@ -20,12 +22,10 @@ export function useWebsocket() {
 	useEffect(() => {
 		if (!socket) return
 
-		//reconnect attempt, attempt
 		socket.onClose((close) => {
 			console.warn('Socket closed: ', close)
 		})
 
-		//socket error'ed
 		socket.onError((err) => {
 			console.warn("Socket error'ed:", err)
 			addErrorToast({
@@ -37,20 +37,19 @@ export function useWebsocket() {
 		socket.onMessage((ev) => {
 			const res = ev.data
 			if (res.error) console.warn('error message: ', ev.data.data)
-			const map_actions = WS_MAPPED_ACTIONS()
+			const map_actions = WS_MAPPED_ACTIONS_REF.current()
 
 			const action = ev?.data?.ws_handler
 			const func = map_actions[action]
 			if (!func) return
 
-			//TODO: fix this ... Parameters<> wont work
 			;(func as (data: unknown) => void)(res?.data)
 		})
 
 		return () => {
 			socket.closeConnection()
 		}
-	}, [socket, WS_MAPPED_ACTIONS, addErrorToast])
+	}, [socket])
 
 	return socket!
 }

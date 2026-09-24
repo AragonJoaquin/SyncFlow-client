@@ -88,8 +88,15 @@ export const PrivateImageUploader = ({ fieldName, label, enableCrop = false }: I
 					<span className="text-neutral-400 w-full h-full flex justify-center items-center text-sm text-center p-10">
 						Drag and drop or click to upload
 					</span>
+				) : enableCrop ? (
+					<AdjustImage {...{ fieldName }} />
 				) : (
-					enableCrop && <AdjustImage {...{ fieldName }} />
+					<img
+						src={preview}
+						alt="Preview"
+						className="size-full object-cover rounded-md cursor-pointer aspect-square"
+						onClick={() => setPreview(undefined)}
+					/>
 				)}
 			</div>
 			<span className="mt-1 flex text-center w-full justify-center items-baseline">

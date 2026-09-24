@@ -92,7 +92,7 @@ export function CreateGroupForm() {
 				</span>
 
 				<span className="flex flex-col justify-center items-center w-full">
-					<ImageUploader fieldName={FIELD_NAMES.PICTURE} label="Upload an image" />
+					<ImageUploader fieldName={FIELD_NAMES.PICTURE} label="Upload an image" enableCrop />
 				</span>
 
 				<Form.Submit asChild>

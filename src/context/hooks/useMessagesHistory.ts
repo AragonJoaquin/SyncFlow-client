@@ -20,7 +20,7 @@ export type client_or_server_message =
 //TODO: optimize this
 export function useMessagesHistory(channelId: Channel['id'] | null) {
 	const categories = useWorkGroupStore((s) => s.categories)
-	const clientMessages = useClientMessagesStore((s) => s.getClientMessages(channelId ?? -1))
+	const clientMessages = useClientMessagesStore((s) => s.getClientMessages)(channelId ?? -1)
 
 	const history: client_or_server_message[] = useMemo(() => {
 		if (!channelId) return []
@@ -28,6 +28,7 @@ export function useMessagesHistory(channelId: Channel['id'] | null) {
 		let serverMessages: Message[] = []
 
 		for (const cat of categories.values()) {
+			if (!cat) continue
 			const ch = cat.channel.find((c) => c.id === channelId)
 			if (!ch) continue
 			serverMessages = ch.messages ?? []

@@ -61,10 +61,15 @@ export class ChatWebSocket {
 	closeConnection = () => this.socket.close()
 
 	//NOTE: listener wrappers
+	//
+	// onClose = (f: (ev: CloseEvent) => void) => {
+	// 	this.socket.removeEventListener('open', this.notify)
+	// 	this.socket.removeEventListener('close', this.notify)
+	// 	this.socket.removeEventListener('error', this.notify)
+	// 	this.socket.onclose = (e) => f(e)
+	// }
+	//
 	onClose = (f: (ev: CloseEvent) => void) => {
-		this.socket.removeEventListener('open', this.notify)
-		this.socket.removeEventListener('close', this.notify)
-		this.socket.removeEventListener('error', this.notify)
 		this.socket.onclose = (e) => f(e)
 	}
 
