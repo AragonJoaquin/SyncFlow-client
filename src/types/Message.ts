@@ -40,8 +40,8 @@ export type MessageMention = {
 
 //NOTE: "dtos"
 export type ReceivedMessage = {
-	message: Message
-	tempId?: string
+	message: MessageRaw
+	temp_id?: string
 }
 
 export const STATUS_MESSAGE = {

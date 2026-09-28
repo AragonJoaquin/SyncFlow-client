@@ -61,9 +61,9 @@ export function useWebsocketActions() {
 	const IndexWSActions = useCallback(() => {
 		const MAP_ACTIONS: Record<(typeof WS_ACTIONS)[keyof typeof WS_ACTIONS], function_ws_types> = {
 			[WS_ACTIONS.WS_PUBLISH]: (msg: ReceivedMessage) => {
-				const { message: m, tempId } = msg
+				const { message: m, temp_id } = msg
 				addMessage(m.channel_id, m)
-				if (user?.id === m.sender_id && tempId) removeClientMsg(m.channel_id, tempId)
+				if (user?.id === m.sender_id && temp_id) removeClientMsg(m.channel_id, temp_id)
 			},
 			[WS_ACTIONS.WS_CREATE_CATEGORY]: (c: Category) => addCategory({ ...c, channel: [] }),
 			[WS_ACTIONS.WS_UPDATE_CATEGORY]: (c: Category) => updateCategory(c.id, c.name, c.description ?? undefined),
