@@ -19,7 +19,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 		if (isPending || fetchedRef.current) return
 
 		setIsPending(true)
-		get<User>('/user/get_own', { silent: true })
+		get<User>('/user', { silent: true })
 			.then(({ data: res }) => {
 				if (res.error) return
 				setUser(res.data)
