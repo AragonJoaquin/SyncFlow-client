@@ -28,7 +28,7 @@ export function GroupUsersPanel() {
 			({ user, membership }) =>
 				user.name.toLowerCase().includes(q) ||
 				user.alias_name.toLowerCase().includes(q) ||
-				membership.group_role.name.toLowerCase().includes(q)
+				membership?.group_role?.name?.toLowerCase()?.includes(q)
 		)
 	}, [search, users])
 
@@ -42,7 +42,7 @@ export function GroupUsersPanel() {
 			acc.push({
 				label: roleUpper,
 				color: ROLE_COLORS[roleUpper] ?? ROLE_COLORS.MEMBER,
-				users: filtered.filter(({ membership: m }) => m.group_role.name.toUpperCase() === roleUpper)
+				users: filtered.filter(({ membership: m }) => m?.group_role?.name?.toUpperCase() === roleUpper)
 			})
 
 			return acc

@@ -1,9 +1,20 @@
 import type { UUIDv4 } from '.'
 
-export type Message = {
+export type MessageCreate = {
+	content?: string
+	citing_id?: number
+	channel_id: number
+	temp_id: string
+}
+
+export type MessageUpdate = {
+	content: string
+}
+
+export type Message_NoSensibleData = {
 	id: number
 	content: string
-	is_deleted: boolean // only matters before asserting the message to the state
+	is_deleted: boolean
 	sent_at: Date
 	last_modified: Date | null
 
@@ -14,6 +25,7 @@ export type Message = {
 	file_id: UUIDv4 | null
 }
 
+export type Message = Message_NoSensibleData
 export type MessageRaw = Message & {
 	sent_at: string
 	last_modified: string | null

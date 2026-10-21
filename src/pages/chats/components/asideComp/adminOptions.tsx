@@ -19,13 +19,10 @@ export function AdminOptions() {
 
 	if (user === undefined) return
 
-	const {
-		membership: {
-			group_role: { name }
-		}
-	} = user
+	const groupRoleName = user?.membership?.group_role?.name
+	if (!groupRoleName) return
 
-	const ROLE = ROLE_TYPES_ENUM[name.toUpperCase() as keyof typeof ROLE_TYPES_ENUM] ?? ROLE_TYPES_ENUM.MEMBER
+	const ROLE = ROLE_TYPES_ENUM[groupRoleName.toUpperCase() as keyof typeof ROLE_TYPES_ENUM] ?? ROLE_TYPES_ENUM.MEMBER
 
 	if (ROLE === ROLE_TYPES_ENUM.MEMBER) return
 	return (
