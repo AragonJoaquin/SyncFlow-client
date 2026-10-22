@@ -24,12 +24,13 @@ export function GroupUsersPanel() {
 	const filtered = useMemo(() => {
 		if (!search.trim()) return users
 		const q = search.toLowerCase()
-		return users.filter(
-			({ user, membership }) =>
-				user.name.toLowerCase().includes(q) ||
-				user.alias_name.toLowerCase().includes(q) ||
-				membership?.group_role?.name?.toLowerCase()?.includes(q)
-		)
+		return users.filter(({ user, membership }) => {
+			if (!user) return false
+			const name = user.name?.toLowerCase() ?? ''
+			const alias = user.alias_name?.toLowerCase() ?? ''
+			const roleName = membership?.group_role?.name?.toLowerCase() ?? ''
+			return name.includes(q) || alias.includes(q) || roleName.includes(q)
+		})
 	}, [search, users])
 
 	// we group them by role
