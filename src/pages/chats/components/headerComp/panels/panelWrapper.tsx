@@ -32,21 +32,20 @@ export function PannelWrapper({
 	const isOpen = activePanel === panelType
 
 	return (
-		<dialog
-			aria-label="Group Members"
+		<div
+			aria-label={panelName}
 			aria-modal="true"
-			className={`fixed inset-0 transition-opacity duration-300 z-90 ${isOpen ? 'visible opacity-100' : 'invisible pointer-events-none opacity-0'}`}
+			className={`fixed inset-0 transition-opacity duration-300 z-[999] pointer-events-none ${isOpen ? 'visible opacity-100 pointer-events-auto' : 'invisible opacity-0'}`}
 		>
-			{/*black bg*/}
 			<div
 				role="presentation"
-				className={`absolute inset-0 bg-neutral-900/60 transition-opacity duration-300 z-99 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+				className={`absolute inset-0 bg-neutral-900/65 backdrop-blur-[1px] transition-opacity duration-300 z-[99] pointer-events-auto ${isOpen ? 'opacity-100' : 'opacity-0'}`}
 				onClick={onClose}
 				onKeyUp={onClose}
 			/>
 
 			<aside
-				className={`absolute right-0 top-0 h-full w-[320px] bg-darkBG border-l-2 border-l-neutral-700 shadow-xl shadow-neutral-800 flex flex-col transition-transform duration-300 ease-out z-100 md:block ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+				className={`absolute right-0 top-0 h-full w-[320px] bg-darkBG border-l-2 border-l-neutral-700 shadow-xl shadow-neutral-800 flex flex-col transition-transform duration-300 ease-out z-[100] pointer-events-auto ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
 			>
 				<header className="flex items-center justify-between px-4 py-3 border-b border-neutral-700/50">
 					<span className="flex items-center gap-2">
@@ -76,6 +75,6 @@ export function PannelWrapper({
 
 				<main className={`flex-1 overflow-y-auto px-3 pb-3 ${className}`}>{children}</main>
 			</aside>
-		</dialog>
+		</div>
 	)
 }

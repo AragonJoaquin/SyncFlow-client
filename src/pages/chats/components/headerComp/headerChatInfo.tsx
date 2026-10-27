@@ -126,7 +126,7 @@ export function HeaderChatInfo() {
 				</span>
 
 				{/* implement a horizontal tab */}
-				<ul className="flex flex-row gap-2 *:flex *:justify-center *:items-center *:bg-neutral-700/40 *:p-1 *:rounded-md md:*:flex *:last:flex!">
+				<div className="flex flex-row gap-2">
 					<SFButton
 						styling="terciary"
 						title="Pinned Messages"
@@ -134,9 +134,7 @@ export function HeaderChatInfo() {
 						aria-expanded={activePanel === SIDE_PANNELS_STATE.PINNED}
 						onClick={() => openPanel(SIDE_PANNELS_STATE.PINNED)}
 					>
-						<li>
-							<SVGPin className="" />
-						</li>
+						<SVGPin className="" />
 					</SFButton>
 
 					<SFButton
@@ -146,11 +144,9 @@ export function HeaderChatInfo() {
 						aria-expanded={activePanel === SIDE_PANNELS_STATE.USERS}
 						onClick={() => openPanel(SIDE_PANNELS_STATE.USERS)}
 					>
-						<li>
-							<SVGUsers className="" />
-						</li>
+						<SVGUsers className="" />
 					</SFButton>
-				</ul>
+				</div>
 			</span>
 
 			<PinnedMessagesPanel />
