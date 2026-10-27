@@ -1,13 +1,13 @@
 import { WS_ACTIONS } from '@/api'
 import { ErrorServer } from '@/api/axios_helper'
-import { SFButton, SFDropDown } from '@/components'
+import { SFButton, SFDialog, SFDropDown } from '@/components'
 import { DumbInput } from '@/components/input'
-import { SVGChevronArrow, SVGPhoto, SVGPin, SVGSearch, SVGTrash, SVGUsers } from '@/components/svgs'
+import { SVGChevronArrow, SVGPhoto, SVGPin, SVGPlus, SVGSearch, SVGTrash, SVGUsers } from '@/components/svgs'
 import { useChatContext } from '@/context'
 import { SIDE_PANNELS_STATE } from '@/context/chatContext'
 import { useToastStore, useWorkGroupStore } from '@/store'
 import { APP_NAME } from '@/utils'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { GroupUsersPanel, PinnedMessagesPanel } from './panels'
 
@@ -24,7 +24,7 @@ export function HeaderChatInfo() {
 
 	const { websocket } = useChatContext()
 
-	const { addErrorToast } = useToastStore(
+	const { addErrorToast, addSuccessToast } = useToastStore(
 		useShallow((s) => ({
 			addErrorToast: s.addErrorToast,
 			addSuccessToast: s.addSuccessToast
@@ -34,6 +34,9 @@ export function HeaderChatInfo() {
 	const {
 		sidePanel: { openPanel, activePanel }
 	} = useChatContext()
+
+	const [inviteUuid, setInviteUuid] = useState<string>('')
+	const [isInviteOpen, setIsInviteOpen] = useState<boolean>(false)
 
 	const LeaveGroup = useCallback(async () => {
 		try {
@@ -46,12 +49,34 @@ export function HeaderChatInfo() {
 
 	const AboutThisGroup = useCallback(() => {}, [])
 
+	const InvitePeople = useCallback(() => {
+		const uuid = crypto.randomUUID()
+		setInviteUuid(uuid)
+		setIsInviteOpen(true)
+	}, [])
+
+	const copyInviteUuid = useCallback(() => {
+		navigator.clipboard
+			.writeText(inviteUuid)
+			.then(() => {
+				addSuccessToast('Invite UUID copied to clipboard!')
+			})
+			.catch(() => {
+				addSuccessToast('Invite UUID generated!')
+			})
+	}, [inviteUuid, addSuccessToast])
+
 	const ELEMENTS_DD: Parameters<typeof SFDropDown>[0]['elements'] = {
 		General: [
 			{
 				name: 'About this group',
 				SVG: SVGPhoto,
 				onClick: AboutThisGroup
+			},
+			{
+				name: 'Invite people',
+				SVG: SVGPlus,
+				onClick: InvitePeople
 			}
 		],
 		Options: [
@@ -130,6 +155,36 @@ export function HeaderChatInfo() {
 
 			<PinnedMessagesPanel />
 			<GroupUsersPanel />
+
+			<SFDialog
+				title="Invite People"
+				description="Share this invite UUID with others so they can join this group."
+				trigger={<span />}
+				open={isInviteOpen}
+				onOpenChange={setIsInviteOpen}
+			>
+				<div className="flex flex-col gap-4">
+					<div className="flex items-center gap-2">
+						<DumbInput
+							type="text"
+							className="w-full! py-2! bg-neutral-800 text-white font-mono text-sm select-all"
+							styling="ghost"
+							opts={{
+								value: inviteUuid,
+								readOnly: true
+							}}
+						/>
+					</div>
+					<div className="flex justify-end gap-2">
+						<SFButton styling="secondary" onClick={() => setIsInviteOpen(false)}>
+							Close
+						</SFButton>
+						<SFButton styling="primary" onClick={copyInviteUuid}>
+							Copy UUID
+						</SFButton>
+					</div>
+				</div>
+			</SFDialog>
 		</article>
 	)
 }

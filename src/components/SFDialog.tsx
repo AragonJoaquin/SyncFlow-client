@@ -58,15 +58,38 @@ export function SFDialog({
 	description,
 	trigger = <span />,
 	children,
-	onOpenChange
-}: Omit<ISFDialog, 'open' | 'onClose' | 'onTrigger'>) {
-	const [open, setOpen] = useState(false)
+	onOpenChange,
+	open: controlledOpen,
+	onClose: controlledOnClose,
+	onTrigger: controlledOnTrigger
+}: Partial<ISFDialog>) {
+	const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
 
-	const onClose = useCallback(() => setOpen(false), [])
-	const onTrigger = useCallback(() => setOpen(true), [])
+	const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen
+	const onClose = useCallback(() => {
+		controlledOnClose?.()
+		setUncontrolledOpen(false)
+		onOpenChange?.(false)
+	}, [controlledOnClose, onOpenChange])
+	const onTrigger = useCallback(() => {
+		controlledOnTrigger?.()
+		setUncontrolledOpen(true)
+		onOpenChange?.(true)
+	}, [controlledOnTrigger, onOpenChange])
 
 	return (
-		<SFCustomDialog {...{ title, description, trigger, onOpenChange, open, onClose, onTrigger }}>
+		<SFCustomDialog
+			title={title ?? ''}
+			description={description}
+			trigger={trigger}
+			onOpenChange={(o) => {
+				if (!o) onClose()
+				else onTrigger()
+			}}
+			open={open}
+			onClose={onClose}
+			onTrigger={onTrigger}
+		>
 			{children}
 		</SFCustomDialog>
 	)

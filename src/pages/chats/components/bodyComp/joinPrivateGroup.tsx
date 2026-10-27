@@ -26,14 +26,14 @@ export function FormPrivateGroup() {
 	const isPending = methods.formState.isLoading
 	const addWorkGroup = useWorkGroupStore((s) => s.addWorkGroup)
 
-	const { get } = useAxios()
+	const { post } = useAxios()
 	const addSuccessToast = useToastStore(useShallow((s) => s.addSuccessToast))
 
 	const onSubmit: SubmitHandler<z.infer<typeof zodSchema>> = async (e) => {
 		const group_uuid = e[FIELD_NAMES.GROUP_UUID] ?? null
 
 		if (!group_uuid) return
-		const { data: response } = await get<FullWorkGroup>(`/invite/${group_uuid}`)
+		const { data: response } = await post<FullWorkGroup>(`/invite/${group_uuid}`)
 		if (response.error) return
 
 		addWorkGroup(response.data)
