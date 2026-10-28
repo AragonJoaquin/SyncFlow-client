@@ -9,26 +9,30 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 	const { get } = useAxios()
 	const { setUser } = useOwnUserStore(useShallow((s) => ({ setUser: s.setUser })))
 
-	const [isPending, setIsPending] = useState<boolean>(false)
+	const [isPending, setIsPending] = useState<boolean>(true)
 	const fetchedRef = useRef(false)
 
 	// TODO: implement this
 	//const [theme, setTheme] = useState<"light" | "dark">("dark")
 
 	useEffect(() => {
-		if (isPending || fetchedRef.current) return
+		if (fetchedRef.current) return
 
 		setIsPending(true)
 		get<User>('/user', { silent: true })
 			.then(({ data: res }) => {
-				if (res.error) return
-				setUser(res.data)
+				if (res && !res.error) {
+					setUser(res.data)
+				}
+			})
+			.catch(() => {
+				// if unauthorized or error, user remains null
 			})
 			.finally(() => {
 				fetchedRef.current = true
 				setIsPending(false)
 			})
-	}, [get, setUser, isPending])
+	}, [get, setUser])
 
 	return (
 		<GLOBAL_CONTEXT.Provider
