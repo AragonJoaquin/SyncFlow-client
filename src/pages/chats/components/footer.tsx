@@ -34,8 +34,10 @@ const schema = z
 type formData = z.infer<typeof schema>
 
 export function FooterChat() {
+	const [imageName, setImageName] = useState<string>()
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 	const [showUploadModal, setShowUploadModal] = useState(false)
+
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	const { activeChannel } = useWorkGroupStore(useShallow((s) => ({ activeChannel: s.activeChannel })))
@@ -61,10 +63,10 @@ export function FooterChat() {
 
 	const removeAttachedImage = () => {
 		setValue(FIELD_NAMES.FILE, null)
-		if (previewUrl) {
-			URL.revokeObjectURL(previewUrl)
-		}
+		if (previewUrl) URL.revokeObjectURL(previewUrl)
+
 		setPreviewUrl(null)
+		setImageName(undefined)
 		setShowUploadModal(false)
 		if (fileInputRef.current) fileInputRef.current.value = ''
 	}
@@ -144,6 +146,7 @@ export function FooterChat() {
 									if (!file) return
 
 									if (previewUrl) URL.revokeObjectURL(previewUrl)
+									setImageName(file.name ?? 'Image attached')
 									setPreviewUrl(URL.createObjectURL(file))
 									setShowUploadModal(false)
 								}}
@@ -161,7 +164,9 @@ export function FooterChat() {
 							<img src={previewUrl} alt="Upload preview" className="size-full object-cover" />
 						</div>
 						<div className="flex flex-col">
-							<span className="text-xs font-semibold text-foreground">Image attached</span>
+							<span className="text-xs font-semibold text-foreground  max-w-44 w-full overflow-hidden text-ellipsis text-nowrap">
+								{imageName}
+							</span>
 							<span className="text-[10px] text-secondary-foreground">Ready to send</span>
 						</div>
 						<button
@@ -190,7 +195,7 @@ export function FooterChat() {
 						inputName={FIELD_NAMES.SEND_MESSAGE}
 						styling="ghost"
 						placeholder="Write your message..."
-						className="border-0! outline-0! bg-transparent text-foreground placeholder:text-secondary-foreground text-sm"
+						className="border-0! outline-0! bg-transparent text-foreground placeholder:text-secondary-foreground text-sm focus:border-0! focus:ring-0!"
 						fieldClassName="w-full! max-w-none! grow! px-0! py-0!"
 						type="text"
 						disableErrors

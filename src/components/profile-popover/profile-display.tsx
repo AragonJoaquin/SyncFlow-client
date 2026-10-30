@@ -20,12 +20,17 @@ export function ProfileDisplay({ user, onEdit, onStatusChange }: ProfileDisplayP
 	return (
 		<article className="flex flex-col gap-3">
 			<header className="flex items-start gap-3">
-				<span className="shrink-0 relative overflow-hidden *:last:opacity-0 hover:*:last:opacity-100 *:transition-opacity">
+				<button
+					type="button"
+					onClick={onEdit}
+					aria-label="Change profile picture"
+					className="shrink-0 relative overflow-hidden *:last:opacity-0 hover:*:last:opacity-100 focus-visible:*:last:opacity-100 *:transition-opacity cursor-pointer"
+				>
 					<SFAvatarImage src={user.profile_picture} username={user.name} />
 					<div className="absolute w-full h-full inset-0 bg-neutral-900/20 rounded-4xl">
 						<SVGPen className="w-6 h-6 absolute top-1/2 left-1/2 -translate-1/2" />
 					</div>
-				</span>
+				</button>
 
 				<span className="flex-1 min-w-0">
 					<h4 className="text-base font-semibold text-whiteText truncate">{user.name}</h4>

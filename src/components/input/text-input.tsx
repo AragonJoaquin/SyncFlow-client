@@ -45,7 +45,7 @@ export function TextInput({
 			)}
 			<Form.Control
 				type={type}
-				className={`${INPUT_STYLINGS[styling]} ${className} focus:outline-none focus:ring-2 focus:ring-primaryText/30 focus:border-primaryText transition-all duration-200`}
+				className={`${INPUT_STYLINGS[styling]}  focus:outline-none focus:ring-2 focus:ring-primaryText/30 focus:border-primaryText transition-all duration-200 ${className}`}
 				id={id}
 				placeholder={placeholder}
 				autoComplete={autoComplete}

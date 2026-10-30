@@ -23,8 +23,13 @@ export function SFProfilePopover() {
 		})
 	}
 
+	const handleOpenChange = (nextOpen: boolean) => {
+		setOpen(nextOpen)
+		if (!nextOpen) setIsEditing(false)
+	}
+
 	return (
-		<Popover.Root open={open} onOpenChange={setOpen}>
+		<Popover.Root open={open} onOpenChange={handleOpenChange}>
 			<Popover.Trigger asChild>
 				<SFButton styling="terciary" aria-label="Open profile settings">
 					<SVGSettings className="w-5 h-5" />
@@ -33,7 +38,7 @@ export function SFProfilePopover() {
 
 			<Popover.Portal>
 				<Popover.Content
-					className="min-w-[320px] max-w-[400px] bg-darkFG rounded-xl border border-zinc-700 shadow-xl p-4 data-[state=open]:animate-appear-from z-101"
+					className="min-w-[320px] max-w-[400px] bg-darkFG rounded-xl border border-zinc-700 shadow-xl p-2 data-[state=open]:animate-appear-from z-101"
 					side="top"
 					align="start"
 					sideOffset={8}
