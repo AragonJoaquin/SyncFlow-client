@@ -1,17 +1,23 @@
-export const STATES_ENUM = {
-	active: 1,
-	disconnected: 2,
-	invisible: 3
-} as const
+import {
+	SELECTABLE_USER_STATUSES,
+	USER_STATUS,
+	USER_STATUS_COLORS,
+	USER_STATUS_LABELS,
+	type UserStatusKey
+} from '@/constants/userStatus'
 
-export const STATES_NAMES: Record<Uppercase<keyof typeof STATES_ENUM>, keyof typeof STATES_ENUM> = {
+export {
+	SELECTABLE_USER_STATUSES,
+	USER_STATUS as STATES_ENUM,
+	USER_STATUS_COLORS as STATES_COLORS,
+	USER_STATUS_LABELS as STATES_LABELS
+}
+export type { UserStatusKey }
+
+export const STATES_NAMES: Record<Uppercase<UserStatusKey>, UserStatusKey> = {
 	ACTIVE: 'active',
+	IDLE: 'idle',
+	NO_DISTURB: 'no_disturb',
 	DISCONNECTED: 'disconnected',
 	INVISIBLE: 'invisible'
-} as const
-
-export const STATES_COLORS: Record<keyof typeof STATES_ENUM, `bg-${string}`> = {
-	invisible: 'bg-zinc-500',
-	disconnected: 'bg-red-600!',
-	active: 'bg-green-600!'
 } as const

@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
 import { useGetWebsocketInstance } from './useGetWebsocketInstance'
 import { ErrorServer } from '@/api/axios_helper'
+import { createUserStatus } from '@/constants/userStatus'
 
 export function useWebsocket() {
 	const WS_MAPPED_ACTIONS = useWebsocketActions()
@@ -16,12 +17,23 @@ export function useWebsocket() {
 		}))
 	)
 
-	const user = useOwnUserStore(useShallow((s) => s.user))
+	const { user, setUserStatus } = useOwnUserStore(
+		useShallow((s) => ({
+			user: s.user,
+			setUserStatus: s.setUserStatus
+		}))
+	)
 
 	const { chatWS: socket } = useGetWebsocketInstance(!!user)
 
 	useEffect(() => {
 		if (!socket) return
+
+		// The server marks the user as active when the socket connects.
+		// Keep the local profile in sync even when the user is not in a group.
+		const markUserAsActive = () => setUserStatus(createUserStatus('active'))
+		if (socket.socket.readyState === WebSocket.OPEN) markUserAsActive()
+		socket.onOpen(markUserAsActive)
 
 		socket.onClose((close) => {
 			console.warn('Socket closed: ', close)
@@ -50,7 +62,7 @@ export function useWebsocket() {
 		return () => {
 			socket.closeConnection()
 		}
-	}, [socket, addErrorToast])
+	}, [socket, addErrorToast, setUserStatus])
 
 	return socket!
 }

@@ -1,4 +1,4 @@
-import type { GroupMemberWithProfile, User, UUIDv4 } from '@/types'
+import type { GroupMemberWithProfile, UUIDv4, User, UserStatus } from '@/types'
 import { create } from 'zustand'
 import { useWorkGroupStore } from '.'
 
@@ -7,6 +7,7 @@ interface UserStore {
 
 	login: (user: User) => void
 	setUser: (u: User) => void
+	setUserStatus: (status: UserStatus) => void
 	logout: () => void
 }
 
@@ -17,7 +18,14 @@ export const useOwnUserStore = create<UserStore>()((set) => ({
 	login: (user) => set({ user }),
 	logout: () => set({ user: null }),
 
-	setUser: (u) => set((prev) => ({ ...prev, user: u }))
+	setUser: (u) => set((prev) => ({ ...prev, user: u })),
+	setUserStatus: (status) =>
+		set((prev) => {
+			if (!prev.user) return prev
+			if (prev.user.user_status?.id === status.id && prev.user.user_status?.name === status.name) return prev
+
+			return { ...prev, user: { ...prev.user, user_status: status } }
+		})
 }))
 
 interface CacheUsersStore {
@@ -28,6 +36,7 @@ interface CacheUsersStore {
 	addUser: (user: GroupMemberWithProfile) => void
 	removeUser: (user_id: UUIDv4) => void
 	getUser: (user_id: UUIDv4 | undefined) => GroupMemberWithProfile | undefined
+	updateUserStatus: (user_id: UUIDv4, status: UserStatus) => void
 }
 
 export const useCacheUsersStore = create<CacheUsersStore>((set, get) => ({
@@ -75,5 +84,20 @@ export const useCacheUsersStore = create<CacheUsersStore>((set, get) => ({
 		set((state) => ({ ...state, users: newMap }))
 	},
 
-	getUser: (user_id) => user_id && get().users.get(user_id)
+	getUser: (user_id) => user_id && get().users.get(user_id),
+
+	updateUserStatus: (user_id, status) => {
+		const existing = get().users.get(user_id)
+		if (!existing) return
+		if (existing.user.user_status?.id === status.id && existing.user.user_status?.name === status.name) return
+
+		set((state) => {
+			const users = new Map(state.users)
+			users.set(user_id, {
+				...existing,
+				user: { ...existing.user, user_status: status }
+			})
+			return { ...state, users }
+		})
+	}
 }))

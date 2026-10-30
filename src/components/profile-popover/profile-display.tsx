@@ -1,21 +1,19 @@
 import { SVGEdit, SVGPen } from '@/components/svgs'
+import { getUserStatusKey } from '@/constants/userStatus'
 import type { User } from '@/types'
 import { INVALID_DATE } from '@/utils'
 import { SFAvatarImage } from '../SFAvatar'
 import { SFButton } from '../SFButton'
-import { STATES_ENUM, STATES_NAMES } from './constants'
 import { StatusSelector } from './status-selector'
 
 interface ProfileDisplayProps {
 	user: User
 	onEdit: () => void
-	onStatusChange: (status: string) => void
+	onStatusChange: (statusId: number) => void
 }
 
 export function ProfileDisplay({ user, onEdit, onStatusChange }: ProfileDisplayProps) {
-	const statusName: keyof typeof STATES_ENUM = STATES_ENUM[user.user_status.name as keyof typeof STATES_ENUM]
-		? (user.user_status.name as keyof typeof STATES_ENUM)
-		: STATES_NAMES.INVISIBLE
+	const statusName = getUserStatusKey(user.user_status)
 
 	return (
 		<article className="flex flex-col gap-3">

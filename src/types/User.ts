@@ -17,6 +17,13 @@ export type UserStatus = {
 	name: string
 }
 
+// Payload broadcast by the server through WS_UPDATED_STATUS.
+export type UserStatusUpdate = {
+	user_id: UUIDv4
+	status_id: number
+	status_name: string
+}
+
 export type GroupMemberWithProfile = {
 	membership: Group_User
 	user: User

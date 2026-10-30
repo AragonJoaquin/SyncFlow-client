@@ -1,8 +1,8 @@
 import { SFAvatarImage, SFButton, UserProfilePopover } from '@/components'
-import { STATES_ENUM } from '@/components/profile-popover'
+import { getUserStatusKey, USER_STATUS_COLORS } from '@/constants/userStatus'
 import { SVGUsers } from '@/components/svgs'
 import { SIDE_PANNELS_STATE } from '@/context/chatContext'
-import { useCacheUsersStore } from '@/store'
+import { useCacheUsersStore, useOwnUserStore, useWorkGroupStore } from '@/store'
 import type { GroupMemberWithProfile } from '@/types'
 import { useCallback, useMemo, useState } from 'react'
 import { ROLE_COLORS, ROLE_ORDER, ROLE_TYPES_ENUM } from '../../constants'
@@ -18,7 +18,19 @@ export function GroupUsersPanel() {
 	const [search, setSearch] = useState('')
 
 	const setSearchInputVal = useCallback((val: string) => setSearch(val), [])
-	const users = useCacheUsersStore((s) => s.getUsersInGroup)()
+	const usersMap = useCacheUsersStore((s) => s.users)
+	const workGroupId = useWorkGroupStore((s) => s.workGroup?.id)
+	const ownUser = useOwnUserStore((s) => s.user)
+
+	const users = useMemo(() => {
+		const usersInGroup: GroupMemberWithProfile[] = []
+		if (!workGroupId) return usersInGroup
+
+		usersMap.forEach((val) => {
+			if (val.membership.group_id === workGroupId) usersInGroup.push(val)
+		})
+		return usersInGroup
+	}, [usersMap, workGroupId])
 
 	// we filter the user based on the search
 	const filtered = useMemo(() => {
@@ -77,6 +89,8 @@ export function GroupUsersPanel() {
 							<ul className="flex flex-col gap-0.5">
 								{group.users.map(({ user, membership }) => {
 									const roleUpper = membership?.group_role?.name?.toUpperCase() as keyof typeof ROLE_COLORS
+									const isOwnUser = user.id === ownUser?.id
+									const userStatus = getUserStatusKey(isOwnUser ? ownUser?.user_status : user.user_status)
 									return (
 										<li key={user.id}>
 											<UserProfilePopover user={user} membership={membership} side="left">
@@ -87,13 +101,15 @@ export function GroupUsersPanel() {
 													<span className="relative shrink-0">
 														<SFAvatarImage src={user.profile_picture} username={user.name} size="small" />
 														<p
-															className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-darkBG ${membership.status_id === STATES_ENUM.active ? 'bg-green-500' : 'bg-neutral-500'}`}
+															className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-darkBG ${USER_STATUS_COLORS[userStatus]}`}
 														/>
 													</span>
 
 													<span className="flex-1 min-w-0">
 														<div className="flex items-center gap-2">
-															<h5 className="text-sm font-semibold font-OpenSans text-whiteText truncate">{user.name}</h5>
+															<h5 className="text-sm font-semibold font-OpenSans text-whiteText truncate">
+																{isOwnUser ? 'You' : user.name}
+															</h5>
 															<p
 																className={`text-[10px] px-1.5 py-0.5 rounded border shrink-0 font-OpenSans ${ROLE_COLORS[roleUpper] ?? ROLE_COLORS.MEMBER}`}
 															>

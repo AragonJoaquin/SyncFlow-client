@@ -4,6 +4,7 @@ import type { Channel, MessageRaw } from '@/types'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { CHAT_CONTEXT, type all_side_pannels } from './chatContext'
+import { useSocketConnectionState } from './hooks/useSocketConnectionState'
 import { useWebsocket } from './hooks/websocket'
 
 const SET_CHANNEL_SEARCHED = new Set<Channel['id']>()
@@ -24,6 +25,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	}, [])
 
 	const socket = useWebsocket()
+	const socketReadyState = useSocketConnectionState(socket)
+	const isSocketConnected = socketReadyState === WebSocket.OPEN
 
 	const loadMoreMessages = useCallback(
 		async (channel_id: Channel['id']) => {
@@ -53,7 +56,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 					closePanels: closeSidePanels
 				},
 				websocket: {
-					CHAT_SOCKET: socket
+					CHAT_SOCKET: socket,
+					isConnected: isSocketConnected
 				},
 				loadMoreMessages
 			}}

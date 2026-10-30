@@ -33,19 +33,16 @@ export default function App() {
 	return (
 		<main className="min-h-screen h-screen w-full bg-darkBG font-OpenSans text-whiteText">
 			<Switch>
-				<Route
-					path="/"
-					component={() =>
-						user != null ? (
-							<ChatProvider>
-								<ChatPage />
-							</ChatProvider>
-						) : (
-							<Redirect to="/auth" />
-						)
-					}
-				/>
-				<Route path="/auth" component={() => (user ? <Redirect to="/" /> : <AuthPage />)} />
+				<Route path="/">
+					{user != null ? (
+						<ChatProvider>
+							<ChatPage />
+						</ChatProvider>
+					) : (
+						<Redirect to="/auth" />
+					)}
+				</Route>
+				<Route path="/auth">{user ? <Redirect to="/" /> : <AuthPage />}</Route>
 
 				<Route component={NotFoundPage} />
 			</Switch>

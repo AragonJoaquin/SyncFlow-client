@@ -19,6 +19,7 @@ export interface IChatContext {
 
 	websocket: {
 		CHAT_SOCKET: ChatWebSocket
+		isConnected: boolean
 	}
 
 	loadMoreMessages: (channel_id: Channel['id']) => Promise<void>

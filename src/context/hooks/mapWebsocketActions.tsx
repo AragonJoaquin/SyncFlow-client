@@ -1,6 +1,7 @@
 import { WS_ACTIONS } from '@/api'
+import { userStatusFromDto } from '@/constants/userStatus'
 import { useCacheUsersStore, useWorkGroupStore, useOwnUserStore, useClientMessagesStore } from '@/store'
-import type { Category, Channel, ReceivedMessage, UUIDv4 } from '@/types'
+import type { Category, Channel, ReceivedMessage, UserStatusUpdate, UUIDv4 } from '@/types'
 import { useCallback } from 'react'
 import { useShallow } from 'zustand/shallow'
 
@@ -11,6 +12,7 @@ type function_ws_types =
 	| (() => void)
 	| ((u: UUIDv4) => void)
 	| ((id: number) => void)
+	| ((status: UserStatusUpdate) => void)
 
 export function useWebsocketActions() {
 	const {
@@ -42,16 +44,17 @@ export function useWebsocketActions() {
 		}))
 	)
 
-	const { removeUser } = useCacheUsersStore(
+	const { removeUser, updateUserStatus } = useCacheUsersStore(
 		useShallow((s) => ({
-			addUser: s.addUser,
-			removeUser: s.removeUser
+			removeUser: s.removeUser,
+			updateUserStatus: s.updateUserStatus
 		}))
 	)
 
-	const { user } = useOwnUserStore(
+	const { user, setUserStatus } = useOwnUserStore(
 		useShallow((s) => ({
-			user: s.user
+			user: s.user,
+			setUserStatus: s.setUserStatus
 		}))
 	)
 
@@ -86,13 +89,18 @@ export function useWebsocketActions() {
 			[WS_ACTIONS.WS_JOIN_GROUP]: () => alert('not implemented yet'),
 
 			//broadcasted
+			[WS_ACTIONS.WS_UPDATED_STATUS]: (status: UserStatusUpdate) => {
+				const nextStatus = userStatusFromDto(status)
+				updateUserStatus(status.user_id, nextStatus)
+				if (user?.id === status.user_id) setUserStatus(nextStatus)
+			},
 			[WS_ACTIONS.WS_USER_LEFT]: (u: UUIDv4) => removeUser(u),
 			[WS_ACTIONS.WS_USER_JOINED]: () => {}
 		} as const
 
 		return MAP_ACTIONS
 		// oxlint-disable-next-line react-hooks/exhaustive-deps
-	}, [workGroup, user])
+	}, [workGroup, user, setUserStatus, updateUserStatus])
 
 	return IndexWSActions
 }
