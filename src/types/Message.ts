@@ -70,4 +70,6 @@ export type ClientMessageQueueItem = {
 	channel_id: number
 	citing_message: number | null
 	sender_id: UUIDv4
+	file?: File | null
+	previewUrl?: string
 }

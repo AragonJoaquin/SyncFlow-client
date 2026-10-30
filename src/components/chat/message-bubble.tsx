@@ -23,6 +23,9 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 	const isPending = type === CLIENT_OR_SERVER.CLIENT && msg.status === STATUS_MESSAGE.STATUS_PENDING
 	const isError = type === CLIENT_OR_SERVER.CLIENT && msg.status === STATUS_MESSAGE.STATUS_ERROR
 
+	const effectivePreviewUrl =
+		previewUrl || (type === CLIENT_OR_SERVER.CLIENT && msg.previewUrl ? msg.previewUrl : undefined)
+
 	return (
 		<article
 			className={`group flex gap-3 px-2 py-0.5 hover:bg-neutral-800/30 -mx-2 rounded ${!showAvatar && 'pl-[42px]'} ${isPending ? 'opacity-60' : ''} ${isError ? 'bg-red-500/10' : ''}`}
@@ -51,10 +54,10 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 
 				<p className="text-[#dcddde] text-[0.9375rem] whitespace-pre-wrap wrap-break-words">{msg.content}</p>
 
-				{previewUrl ? (
+				{effectivePreviewUrl ? (
 					<span className="mt-1 inline-flex rounded-lg overflow-hidden max-w-[300px]">
 						<img
-							src={previewUrl}
+							src={effectivePreviewUrl}
 							alt="Attached preview"
 							className="max-w-[300px] max-h-[200px] object-cover rounded-lg"
 						/>

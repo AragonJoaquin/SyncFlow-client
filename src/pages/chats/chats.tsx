@@ -72,7 +72,7 @@ export function ChatPage() {
 					<Body />
 
 					{activeChan && (
-						<footer className="shrink-0 bg-darkBG flex flex-row py-2 px-4 border-2 border-neutral-700 items-center w-[calc(100%-40px)] mx-auto mb-2 rounded-xl">
+						<footer className="shrink-0 flex flex-row py-2 px-4 items-center w-[calc(100%-40px)] mx-auto mb-2">
 							<FooterChat />
 						</footer>
 					)}
