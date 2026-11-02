@@ -16,8 +16,6 @@ const MAX_MESSAGE_LENGTH = 150
 export function useMessageActions(message: Message | null) {
 	const { get, put, post, delete: remove } = useAxios()
 
-	const ownUser = useOwnUserStore((s) => s.user)
-
 	const { addSuccessToast } = useToastStore(useShallow((s) => ({ addSuccessToast: s.addSuccessToast })))
 
 	const { updateMessage, removeMessage, addPinnedMessage, removePinnedMessage, setPinnedMessages } = useWorkGroupStore(
@@ -97,6 +95,7 @@ export function useMessageActions(message: Message | null) {
 
 	const toggleReaction = useCallback(
 		async (emoji: string) => {
+			const ownUser = useOwnUserStore.getState().user
 			if (!message || !ownUser) return false
 
 			const reactions = useMessageInteractionStore.getState().getMessageReactions(message.id)
@@ -119,12 +118,13 @@ export function useMessageActions(message: Message | null) {
 
 			return true
 		},
-		[addMessageReaction, message, ownUser, put, remove, removeMessageReaction]
+		[addMessageReaction, message, put, remove, removeMessageReaction]
 	)
 
 	const togglePin = useCallback(async () => {
 		if (!message) return false
 
+		const ownUser = useOwnUserStore.getState().user
 		const isPinned = useWorkGroupStore.getState().isMessagePinned(message.id)
 		const { data } = isPinned
 			? await remove<null>(`/channel/${message.channel_id}/messages/${message.id}/pin`)
@@ -154,16 +154,7 @@ export function useMessageActions(message: Message | null) {
 
 		await refreshPinnedMessages()
 		return true
-	}, [
-		addPinnedMessage,
-		addSuccessToast,
-		message,
-		ownUser?.id,
-		post,
-		refreshPinnedMessages,
-		remove,
-		removePinnedMessage
-	])
+	}, [addPinnedMessage, addSuccessToast, message, post, refreshPinnedMessages, remove, removePinnedMessage])
 
 	return {
 		editMessage,

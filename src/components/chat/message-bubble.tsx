@@ -4,10 +4,17 @@ import { SVGEdit, SVGPin, SVGReply, SVGSmile, SVGTrash } from '@/components/svgs
 import { useMessageActions } from '@/context/hooks/useMessageActions'
 import { useMessagePermissions } from '@/context/hooks/useMessagePermissions'
 import { CLIENT_OR_SERVER, type client_or_server_message } from '@/context/hooks/useMessagesHistory'
-import { useCacheUsersStore, useMessageInteractionStore, useOwnUserStore, useWorkGroupStore } from '@/store'
-import { STATUS_MESSAGE, type MessageReaction, type User } from '@/types'
+import {
+	MESSAGE_DIALOG,
+	useMessageInteractionStore,
+	useMessageUiStore,
+	useOwnUserStore,
+	type MessageDialogType
+} from '@/store'
+import { STATUS_MESSAGE, type Message, type MessageReaction, type User } from '@/types'
 import { FormatRelativeTime } from '@/utils'
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
+import { useShallow } from 'zustand/shallow'
 import { FilePreview } from './file-preview'
 import { DeleteMessageDialog, EmojiPickerDialog, PinMessageDialog } from './message-action-dialogs'
 import { MessageReactions } from './message-reactions'
@@ -19,6 +26,8 @@ export interface MessageBubbleProps {
 	showAvatar: boolean
 	previewUrl?: string
 	file_id?: string
+	citedMessage?: Message
+	citedSenderName?: string
 }
 
 const NO_REACTIONS: MessageReaction[] = []
@@ -26,33 +35,56 @@ const MAX_MESSAGE_LENGTH = 150
 
 const onResend = () => alert('implement this')
 
-export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl }: MessageBubbleProps) {
+function MessageBubbleComponent({
+	message,
+	file_id,
+	sender,
+	showAvatar,
+	previewUrl,
+	citedMessage,
+	citedSenderName
+}: MessageBubbleProps) {
 	const { message: msg, type } = message
 	const serverMessage = type === CLIENT_OR_SERVER.SERVER ? message.message : null
+	const messageId = serverMessage?.id ?? null
 
-	const ownUser = useOwnUserStore((s) => s.user)
+	const ownUserId = useOwnUserStore((s) => s.user?.id)
 	const setReplyTarget = useMessageInteractionStore((s) => s.setReplyTarget)
 	const reactions = useMessageInteractionStore((s) =>
-		serverMessage ? s.getMessageReactions(serverMessage.id) : NO_REACTIONS
+		messageId != null ? s.getMessageReactions(messageId) : NO_REACTIONS
 	)
 
-	const channel = useWorkGroupStore((s) => s.getChannel(serverMessage?.channel_id ?? null))
-	const citedMessage =
-		serverMessage?.citing_message != null
-			? channel?.messages.find((candidate) => candidate.id === serverMessage.citing_message)
-			: undefined
-	const citedMember = useCacheUsersStore((s) => s.getUser(citedMessage?.sender_id))
-	const citedSenderName = citedMember?.user.alias_name ?? citedMember?.user.name ?? 'Unknown'
+	const {
+		isEditing,
+		draft,
+		isSavingEdit,
+		activeDialogType,
+		startEditing,
+		updateEditDraft,
+		setSavingEdit,
+		finishEditing,
+		cancelEditing,
+		openDialog,
+		closeDialog
+	} = useMessageUiStore(
+		useShallow((s) => ({
+			isEditing: messageId != null && s.editingMessageId === messageId,
+			draft: messageId != null && s.editingMessageId === messageId ? s.editDraft : '',
+			isSavingEdit: messageId != null && s.editingMessageId === messageId ? s.isSavingEdit : false,
+			activeDialogType: messageId != null && s.activeDialog?.messageId === messageId ? s.activeDialog.type : null,
+			startEditing: s.startEditing,
+			updateEditDraft: s.updateEditDraft,
+			setSavingEdit: s.setSavingEdit,
+			finishEditing: s.finishEditing,
+			cancelEditing: s.cancelEditing,
+			openDialog: s.openDialog,
+			closeDialog: s.closeDialog
+		}))
+	)
 
 	const permissions = useMessagePermissions(serverMessage)
 	const { editMessage, deleteMessage, toggleReaction, togglePin } = useMessageActions(serverMessage)
 
-	const [isEditing, setIsEditing] = useState(false)
-	const [draft, setDraft] = useState(serverMessage?.content ?? '')
-	const [isSaving, setIsSaving] = useState(false)
-	const [isEmojiOpen, setIsEmojiOpen] = useState(false)
-	const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-	const [isPinOpen, setIsPinOpen] = useState(false)
 	const editRef = useRef<HTMLTextAreaElement>(null)
 
 	const formattedTime = FormatRelativeTime(msg?.sent_at ? new Date(msg.sent_at) : new Date())
@@ -64,6 +96,14 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 		previewUrl || (type === CLIENT_OR_SERVER.CLIENT && msg.previewUrl ? msg.previewUrl : undefined)
 	const effectiveFileId = file_id ?? (type === CLIENT_OR_SERVER.SERVER ? (msg.file_id ?? undefined) : undefined)
 
+	const selectedEmojis = useMemo(
+		() =>
+			ownUserId
+				? reactions.filter((reaction) => reaction.user_id === ownUserId).map((reaction) => reaction.unicode_char)
+				: [],
+		[ownUserId, reactions]
+	)
+
 	useEffect(() => {
 		if (!isEditing) return
 		const input = editRef.current
@@ -73,32 +113,35 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 		input.setSelectionRange(input.value.length, input.value.length)
 	}, [isEditing])
 
-	const startEditing = () => {
+	const handleStartEditing = () => {
 		if (!serverMessage) return
-		setDraft(serverMessage.content)
-		setIsEditing(true)
-	}
-
-	const cancelEditing = () => {
-		if (!serverMessage) return
-		setDraft(serverMessage.content)
-		setIsEditing(false)
+		startEditing(serverMessage.id, serverMessage.content)
 	}
 
 	const submitEdit = async () => {
-		if (!serverMessage || isSaving) return
+		if (!serverMessage) return
 
-		const nextContent = draft.trim()
+		const current = useMessageUiStore.getState()
+		if (current.isSavingEdit) return
+
+		const nextContent = current.editDraft.trim()
 		if (!nextContent) return
 		if (nextContent === serverMessage.content.trim()) {
-			setIsEditing(false)
+			finishEditing(serverMessage.id)
 			return
 		}
 
-		setIsSaving(true)
+		setSavingEdit(true, serverMessage.id)
 		const success = await editMessage(nextContent)
-		setIsSaving(false)
-		if (success) setIsEditing(false)
+		const latest = useMessageUiStore.getState()
+		latest.setSavingEdit(false, serverMessage.id)
+		if (success) latest.finishEditing(serverMessage.id)
+	}
+
+	const handleDelete = async () => {
+		const success = await deleteMessage()
+		if (success && serverMessage) useMessageUiStore.getState().finishEditing(serverMessage.id)
+		return success
 	}
 
 	const handleReply = () => {
@@ -113,9 +156,14 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 		})
 	}
 
-	const selectedEmojis = reactions
-		.filter((reaction) => ownUser && reaction.user_id === ownUser.id)
-		.map((reaction) => reaction.unicode_char)
+	const handleOpenDialog = (type: MessageDialogType) => {
+		if (messageId == null) return
+		openDialog(messageId, type)
+	}
+
+	const handleDialogOpenChange = (type: MessageDialogType) => (open: boolean) => {
+		if (!open && messageId != null) closeDialog(messageId, type)
+	}
 
 	return (
 		<article
@@ -130,7 +178,7 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 							type="button"
 							title="Add reaction"
 							aria-label="Add reaction"
-							onClick={() => setIsEmojiOpen(true)}
+							onClick={() => handleOpenDialog(MESSAGE_DIALOG.EMOJI)}
 							className="p-1.5! rounded-md! text-unfocused! hover:text-whiteText! hover:bg-neutral-700! transition-colors"
 						>
 							<SVGSmile className="w-4 h-4" />
@@ -156,7 +204,7 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 							type="button"
 							title="Edit message"
 							aria-label="Edit message"
-							onClick={startEditing}
+							onClick={handleStartEditing}
 							className="p-1.5! rounded-md! text-unfocused! hover:text-whiteText! hover:bg-neutral-700! transition-colors"
 						>
 							<SVGEdit className="w-4 h-4" />
@@ -169,7 +217,7 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 							type="button"
 							title={permissions.isPinned ? 'Unpin message' : 'Pin message'}
 							aria-label={permissions.isPinned ? 'Unpin message' : 'Pin message'}
-							onClick={() => setIsPinOpen(true)}
+							onClick={() => handleOpenDialog(MESSAGE_DIALOG.PIN)}
 							className={`p-1.5! rounded-md! transition-colors hover:bg-neutral-700! ${
 								permissions.isPinned ? 'text-primary!' : 'text-unfocused! hover:text-whiteText!'
 							}`}
@@ -184,7 +232,7 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 							type="button"
 							title="Delete message"
 							aria-label="Delete message"
-							onClick={() => setIsDeleteOpen(true)}
+							onClick={() => handleOpenDialog(MESSAGE_DIALOG.DELETE)}
 							className="p-1.5! rounded-md! text-unfocused! hover:text-red-400! hover:bg-red-500/10! transition-colors"
 						>
 							<SVGTrash className="w-4 h-4" />
@@ -228,7 +276,7 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 						title="Jump to replied message"
 					>
 						<SVGReply className="w-3.5 h-3.5 shrink-0 -scale-y-100" aria-hidden="true" />
-						<span className="font-semibold shrink-0">{citedSenderName}</span>
+						<span className="font-semibold shrink-0">{citedSenderName ?? 'Unknown'}</span>
 						<span className="truncate">{citedMessage.content || 'Attachment'}</span>
 					</button>
 				)}
@@ -240,7 +288,8 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 							value={draft}
 							maxLength={MAX_MESSAGE_LENGTH}
 							rows={2}
-							onChange={(e) => setDraft(e.target.value)}
+							disabled={isSavingEdit}
+							onChange={(e) => updateEditDraft(e.target.value)}
 							onKeyDown={(e) => {
 								if (e.key === 'Enter' && !e.shiftKey) {
 									e.preventDefault()
@@ -252,7 +301,7 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 									cancelEditing()
 								}
 							}}
-							className="w-full resize-none rounded-md border border-neutral-600 bg-neutral-900 px-2.5 py-1.5 text-[0.9375rem] text-[#dcddde] focus:outline-none focus:ring-2 focus:ring-primary/30"
+							className="w-full resize-none rounded-md border border-neutral-600 bg-neutral-900 px-2.5 py-1.5 text-[0.9375rem] text-[#dcddde] focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60"
 							aria-label="Edit message content"
 						/>
 
@@ -264,7 +313,7 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 							<button
 								type="button"
 								onClick={cancelEditing}
-								disabled={isSaving}
+								disabled={isSavingEdit}
 								className="text-[0.6875rem] font-medium text-unfocused hover:text-whiteText disabled:opacity-50 cursor-pointer"
 							>
 								Cancel
@@ -272,10 +321,10 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 							<button
 								type="button"
 								onClick={() => void submitEdit()}
-								disabled={isSaving || !draft.trim()}
+								disabled={isSavingEdit || !draft.trim()}
 								className="text-[0.6875rem] font-semibold text-primary hover:brightness-125 disabled:opacity-50 cursor-pointer"
 							>
-								{isSaving ? 'Saving...' : 'Save'}
+								{isSavingEdit ? 'Saving...' : 'Save'}
 							</button>
 						</div>
 					</section>
@@ -320,31 +369,50 @@ export function MessageBubble({ message, file_id, sender, showAvatar, previewUrl
 				)}
 			</section>
 
-			{serverMessage && (
-				<>
-					<EmojiPickerDialog
-						open={isEmojiOpen}
-						onOpenChange={setIsEmojiOpen}
-						selectedEmojis={selectedEmojis}
-						onSelect={toggleReaction}
-					/>
+			{serverMessage && activeDialogType === MESSAGE_DIALOG.EMOJI && (
+				<EmojiPickerDialog
+					open
+					onOpenChange={handleDialogOpenChange(MESSAGE_DIALOG.EMOJI)}
+					selectedEmojis={selectedEmojis}
+					onSelect={toggleReaction}
+				/>
+			)}
 
-					<DeleteMessageDialog
-						open={isDeleteOpen}
-						onOpenChange={setIsDeleteOpen}
-						content={serverMessage.content || 'Attachment'}
-						onConfirm={deleteMessage}
-					/>
+			{serverMessage && activeDialogType === MESSAGE_DIALOG.DELETE && (
+				<DeleteMessageDialog
+					open
+					onOpenChange={handleDialogOpenChange(MESSAGE_DIALOG.DELETE)}
+					content={serverMessage.content || 'Attachment'}
+					onConfirm={handleDelete}
+				/>
+			)}
 
-					<PinMessageDialog
-						open={isPinOpen}
-						onOpenChange={setIsPinOpen}
-						content={serverMessage.content || 'Attachment'}
-						isPinned={permissions.isPinned}
-						onConfirm={togglePin}
-					/>
-				</>
+			{serverMessage && activeDialogType === MESSAGE_DIALOG.PIN && (
+				<PinMessageDialog
+					open
+					onOpenChange={handleDialogOpenChange(MESSAGE_DIALOG.PIN)}
+					content={serverMessage.content || 'Attachment'}
+					isPinned={permissions.isPinned}
+					onConfirm={togglePin}
+				/>
 			)}
 		</article>
 	)
 }
+
+function areMessageBubblePropsEqual(prev: MessageBubbleProps, next: MessageBubbleProps) {
+	return (
+		prev.message.type === next.message.type &&
+		prev.message.message === next.message.message &&
+		prev.sender?.id === next.sender?.id &&
+		prev.sender?.alias_name === next.sender?.alias_name &&
+		prev.sender?.profile_picture?.id === next.sender?.profile_picture?.id &&
+		prev.showAvatar === next.showAvatar &&
+		prev.previewUrl === next.previewUrl &&
+		prev.file_id === next.file_id &&
+		prev.citedMessage === next.citedMessage &&
+		prev.citedSenderName === next.citedSenderName
+	)
+}
+
+export const MessageBubble = memo(MessageBubbleComponent, areMessageBubblePropsEqual)

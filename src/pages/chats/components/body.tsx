@@ -1,7 +1,8 @@
 import { SFTipCard } from '@/components'
 import { MessageBubble, type MessageBubbleProps } from '@/components/chat/message-bubble'
 import { SFImage } from '@/components/SFImage'
-import { useCacheUsersStore, useWorkGroupStore } from '@/store'
+import { useCacheUsersStore, useMessageUiStore, useWorkGroupStore } from '@/store'
+import type { Message } from '@/types'
 import { CLIENT_OR_SERVER, useMessagesHistory } from '@/context/hooks/useMessagesHistory'
 import { useEffect, useMemo, useRef } from 'react'
 import { useShallow } from 'zustand/shallow'
@@ -32,8 +33,17 @@ export function Body() {
 		return () => clearTimeout(timeid)
 	}, [history])
 
+	useEffect(() => {
+		useMessageUiStore.getState().reset()
+	}, [activeChannelId])
+
 	const groupedMessages = useMemo(() => {
 		const result: MessageBubbleProps[] = []
+		const serverMessagesById = new Map<number, Message>()
+
+		for (const item of history) {
+			if (item.type === CLIENT_OR_SERVER.SERVER) serverMessagesById.set(item.message.id, item.message)
+		}
 
 		let currentChainLength: number = 0
 		history.forEach((m) => {
@@ -43,7 +53,19 @@ export function Body() {
 			if (!showAvatar) currentChainLength++
 			else currentChainLength = 0
 
-			result.push({ message: m, sender: getUser(m.message.sender_id)?.user, showAvatar })
+			const citedMessage =
+				m.type === CLIENT_OR_SERVER.SERVER && m.message.citing_message != null
+					? serverMessagesById.get(m.message.citing_message)
+					: undefined
+			const citedSender = citedMessage ? getUser(citedMessage.sender_id)?.user : undefined
+
+			result.push({
+				message: m,
+				sender: getUser(m.message.sender_id)?.user,
+				showAvatar,
+				citedMessage,
+				citedSenderName: citedSender?.alias_name ?? citedSender?.name
+			})
 		})
 
 		return result
@@ -54,7 +76,7 @@ export function Body() {
 			<section className={`font-Cabin flex flex-col grow h-full gap-4 p-3`}>
 				{activeChannelId ? (
 					history.length > 0 &&
-					groupedMessages.map(({ message: msg, showAvatar, sender }) => {
+					groupedMessages.map(({ message: msg, showAvatar, sender, citedMessage, citedSenderName }) => {
 						const isClient = msg.type === CLIENT_OR_SERVER.CLIENT
 						return (
 							<MessageBubble
@@ -62,6 +84,8 @@ export function Body() {
 								message={msg}
 								sender={sender}
 								showAvatar={showAvatar}
+								citedMessage={citedMessage}
+								citedSenderName={citedSenderName}
 							/>
 						)
 					})

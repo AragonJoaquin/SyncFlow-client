@@ -70,7 +70,6 @@ export function SFToastRoot() {
 
 export function SFToastItem({ id, title, description, variant }: SFToast) {
 	const removeToast = useToastStore(useShallow((e) => e.removeToast))
-	console.log('toast id: ', id)
 
 	return (
 		<Toast.Root

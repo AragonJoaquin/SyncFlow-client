@@ -9,7 +9,7 @@ interface MessageReactionsProps {
 }
 
 export function MessageReactions({ reactions, onToggle, disabled = false }: MessageReactionsProps) {
-	const ownUser = useOwnUserStore((s) => s.user)
+	const ownUserId = useOwnUserStore((s) => s.user?.id)
 
 	const grouped = useMemo(() => {
 		const map = new Map<string, { emoji: string; count: number; hasOwn: boolean }>()
@@ -22,12 +22,12 @@ export function MessageReactions({ reactions, onToggle, disabled = false }: Mess
 			}
 
 			entry.count += 1
-			if (ownUser && reaction.user_id === ownUser.id) entry.hasOwn = true
+			if (ownUserId && reaction.user_id === ownUserId) entry.hasOwn = true
 			map.set(reaction.unicode_char, entry)
 		}
 
 		return [...map.values()]
-	}, [ownUser, reactions])
+	}, [ownUserId, reactions])
 
 	if (grouped.length === 0) return null
 
