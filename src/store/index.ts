@@ -1,5 +1,6 @@
 export * from './constants'
 export * from './clientMessagesStore'
+export * from './messageInteractionStore'
 export * from './toastStore'
 export * from './userStore'
 export * from './workGroupStore'

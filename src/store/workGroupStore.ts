@@ -45,6 +45,7 @@ interface WorkGroupStore {
 
 	// messages
 	addMessage: (channel_id: channel_id, message: MessageRaw) => void
+	updateMessage: (channel_id: channel_id, message_id: message_id, patch: Partial<Message>) => void
 	removeMessage: (channel_id: channel_id, message_id: message_id) => void
 	getMessage: (channel_id: channel_id, message_id: message_id) => [Channel | undefined, Message | undefined]
 	getMessageIndex: (channel_id: channel_id, message_id: message_id) => number
@@ -52,8 +53,12 @@ interface WorkGroupStore {
 
 	// pinnedMessages
 	pinnedMessages: PinnedMessage[]
-	addPinnedMessages(p: PinnedMessage[]): void
-	getPinnedMessages(): PinnedMessage[]
+	setPinnedMessages: (p: PinnedMessage[]) => void
+	addPinnedMessages: (p: PinnedMessage[]) => void
+	addPinnedMessage: (p: PinnedMessage) => void
+	removePinnedMessage: (message_id: message_id) => void
+	isMessagePinned: (message_id: message_id) => boolean
+	getPinnedMessages: () => PinnedMessage[]
 
 	// channel fetching tracking
 	fetchedChannels: Set<channel_id>
@@ -210,6 +215,29 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 		}))
 	},
 
+	updateMessage: (channel_id, message_id, patch) => {
+		const channel = get().getChannel(channel_id)
+		if (!channel) return
+
+		const category = get().categories.get(channel.category_id)
+		if (!category) return
+
+		set((s) => ({
+			...s,
+			categories: new Map(s.categories).set(category.id, {
+				...category,
+				channel: category.channel.map((ch) =>
+					ch.id === channel_id
+						? {
+								...ch,
+								messages: ch.messages.map((msg) => (msg.id === message_id ? { ...msg, ...patch } : msg))
+							}
+						: ch
+				)
+			})
+		}))
+	},
+
 	removeMessage: (channel_id: channel_id, message_id: message_id) => {
 		const channel = get().getChannel(channel_id)
 		if (!channel) return
@@ -253,7 +281,24 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 	},
 
 	//NOTE: pinnedMessages
-	addPinnedMessages: (p) => set((s) => ({ ...s, pinnedMessages: [...s.pinnedMessages, ...p] })),
+	setPinnedMessages: (p) => set((s) => ({ ...s, pinnedMessages: p })),
+	addPinnedMessages: (p) =>
+		set((s) => {
+			const existing = new Set(s.pinnedMessages.map((msg) => msg.message_id))
+			const next = p.filter((msg) => !existing.has(msg.message_id))
+			return { ...s, pinnedMessages: [...s.pinnedMessages, ...next] }
+		}),
+	addPinnedMessage: (p) =>
+		set((s) => {
+			if (s.pinnedMessages.some((msg) => msg.message_id === p.message_id)) return s
+			return { ...s, pinnedMessages: [...s.pinnedMessages, p] }
+		}),
+	removePinnedMessage: (message_id) =>
+		set((s) => ({
+			...s,
+			pinnedMessages: s.pinnedMessages.filter((msg) => msg.message_id !== message_id)
+		})),
+	isMessagePinned: (message_id) => get().pinnedMessages.some((msg) => msg.message_id === message_id),
 	getPinnedMessages: () => get().pinnedMessages,
 
 	//NOTE: Channel fetching tracking

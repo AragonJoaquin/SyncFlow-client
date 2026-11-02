@@ -1,13 +1,20 @@
 import { WS_ACTIONS } from '@/api'
 import { SFButton } from '@/components'
+import { ReplyPreview } from '@/components/chat/reply-preview'
 import { ImageUploader, TextInput } from '@/components/input'
 import { SVGPlus, SVGSendArrow } from '@/components/svgs'
 import { useChatContext } from '@/context'
-import { useOwnUserStore, useClientMessagesStore, useWorkGroupStore } from '@/store'
+import {
+	useCacheUsersStore,
+	useClientMessagesStore,
+	useMessageInteractionStore,
+	useOwnUserStore,
+	useWorkGroupStore
+} from '@/store'
 import { ZOD_VALIDATE_FILE } from '@/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from 'radix-ui'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 import z from 'zod'
 import { useShallow } from 'zustand/shallow'
@@ -44,10 +51,29 @@ export function FooterChat() {
 	const user = useOwnUserStore(useShallow((s) => s.user))
 	const addClientMessage = useClientMessagesStore((s) => s.addClientMessage)
 
-	const { handleSubmit, register, setValue, reset, watch, ...methods } = useForm({
+	const replyTarget = useMessageInteractionStore((s) => s.replyTarget)
+	const clearReplyTarget = useMessageInteractionStore((s) => s.clearReplyTarget)
+	const replyMember = useCacheUsersStore((s) => s.getUser(replyTarget?.senderId))
+
+	const { handleSubmit, register, setValue, reset, watch, setFocus, ...methods } = useForm({
 		resolver: zodResolver(schema),
 		mode: 'onChange'
 	})
+
+	const visibleReply = replyTarget && replyTarget.channelId === activeChannel ? replyTarget : null
+
+	useEffect(() => {
+		clearReplyTarget()
+	}, [activeChannel, clearReplyTarget])
+
+	useEffect(() => {
+		if (visibleReply) {
+			setValue(FIELD_NAMES.CITING_ID, visibleReply.messageId)
+			setFocus(FIELD_NAMES.SEND_MESSAGE)
+		} else {
+			setValue(FIELD_NAMES.CITING_ID, null)
+		}
+	}, [visibleReply, setFocus, setValue])
 
 	const watchedFile = watch(FIELD_NAMES.FILE)
 
@@ -100,6 +126,7 @@ export function FooterChat() {
 			[FIELD_NAMES.CITING_ID]: null,
 			[FIELD_NAMES.FILE]: undefined
 		})
+		clearReplyTarget()
 
 		setPreviewUrl(null)
 		setShowUploadModal(false)
@@ -107,7 +134,7 @@ export function FooterChat() {
 	}
 
 	return (
-		<FormProvider {...{ handleSubmit, register, setValue, reset, watch, ...methods }}>
+		<FormProvider {...{ handleSubmit, register, setValue, reset, watch, setFocus, ...methods }}>
 			<Form.Root
 				className="bg-darkBG flex relative flex-col grow gap-2w-full rounded-xl"
 				onSubmit={handleSubmit(onSubmit)}
@@ -179,7 +206,20 @@ export function FooterChat() {
 					</section>
 				)}
 
-				<section className="flex flex-row items-center gap-3 w-full px-4 py-2.5 rounded-xl border border-neutral-700">
+				{visibleReply && (
+					<ReplyPreview
+						senderName={replyMember?.user.alias_name ?? replyMember?.user.name ?? visibleReply.senderName}
+						content={visibleReply.content}
+						profilePicture={replyMember?.user.profile_picture}
+						onCancel={clearReplyTarget}
+					/>
+				)}
+
+				<section
+					className={`flex flex-row items-center gap-3 w-full px-4 py-2.5 rounded-xl border border-neutral-700 ${
+						visibleReply ? 'rounded-t-none border-t-0' : ''
+					}`}
+				>
 					<SFButton
 						styling="terciary"
 						type="button"
