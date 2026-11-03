@@ -1,15 +1,8 @@
-import type { MessageReaction, UUIDv4 } from '@/types'
+import type { Message, MessageReaction, UUIDv4 } from '@/types'
 import { create } from 'zustand'
+import { areReactionsEqual, type ReplyTarget } from './interactions'
 
-export type ReplyTarget = {
-	messageId: number
-	channelId: number
-	senderId: UUIDv4
-	senderName: string
-	content: string
-}
-
-const EMPTY_REACTIONS: MessageReaction[] = []
+type HydratableMessage = Pick<Message, 'id' | 'reactions'>
 
 interface MessageInteractionStore {
 	replyTarget: ReplyTarget | null
@@ -18,6 +11,7 @@ interface MessageInteractionStore {
 
 	reactions: Map<number, MessageReaction[]>
 	getMessageReactions: (messageId: number) => MessageReaction[]
+	hydrateMessageReactions: (messages: ReadonlyArray<HydratableMessage>) => void
 	addMessageReaction: (reaction: MessageReaction) => void
 	removeMessageReaction: (messageId: number, userId: UUIDv4, emoji: string) => void
 	clearMessageReactions: (messageId: number) => void
@@ -30,7 +24,27 @@ export const useMessageInteractionStore = create<MessageInteractionStore>((set, 
 
 	reactions: new Map<number, MessageReaction[]>(),
 
-	getMessageReactions: (messageId) => get().reactions.get(messageId) ?? EMPTY_REACTIONS,
+	getMessageReactions: (messageId) => get().reactions.get(messageId) ?? [],
+
+	hydrateMessageReactions: (messages) =>
+		set((s) => {
+			let reactions: Map<number, MessageReaction[]> | null = null
+
+			for (const message of messages) {
+				const next = message.reactions ?? []
+				const current = s.reactions.get(message.id)
+
+				if (areReactionsEqual(current, next)) continue
+				if (!current && next.length === 0) continue
+
+				reactions ??= new Map(s.reactions)
+
+				if (next.length === 0) reactions.delete(message.id)
+				else reactions.set(message.id, next)
+			}
+
+			return reactions ? { ...s, reactions } : s
+		}),
 
 	addMessageReaction: (reaction) =>
 		set((s) => {

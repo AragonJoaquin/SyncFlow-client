@@ -3,7 +3,7 @@ import { useWorkGroupStore } from '@/store'
 import type { Channel, MessageRaw } from '@/types'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useShallow } from 'zustand/shallow'
-import { CHAT_CONTEXT, type all_side_pannels } from './chatContext'
+import { CHAT_CONTEXT, CHAT_SOCKET_CONTEXT, type all_side_pannels } from './chatContext'
 import { useSocketConnectionState } from './hooks/useSocketConnectionState'
 import { useWebsocket } from './hooks/websocket'
 
@@ -48,21 +48,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	)
 
 	return (
-		<CHAT_CONTEXT.Provider
-			value={{
-				sidePanel: {
-					openPanel: openSidePanel,
-					activePanel: sideActivePanel,
-					closePanels: closeSidePanels
-				},
-				websocket: {
-					CHAT_SOCKET: socket,
-					isConnected: isSocketConnected
-				},
-				loadMoreMessages
-			}}
-		>
-			{children}
-		</CHAT_CONTEXT.Provider>
+		<CHAT_SOCKET_CONTEXT.Provider value={socket}>
+			<CHAT_CONTEXT.Provider
+				value={{
+					sidePanel: {
+						openPanel: openSidePanel,
+						activePanel: sideActivePanel,
+						closePanels: closeSidePanels
+					},
+					websocket: {
+						CHAT_SOCKET: socket,
+						isConnected: isSocketConnected
+					},
+					loadMoreMessages
+				}}
+			>
+				{children}
+			</CHAT_CONTEXT.Provider>
+		</CHAT_SOCKET_CONTEXT.Provider>
 	)
 }

@@ -1,4 +1,4 @@
-import type { UUIDv4 } from '.'
+import type { MessageReaction, UUIDv4 } from '.'
 
 export type MessageCreate = {
 	content?: string
@@ -23,26 +23,27 @@ export type Message_NoSensibleData = {
 	channel_id: number
 	sender_id: UUIDv4
 	file_id: UUIDv4 | null
+	reactions: MessageReaction[]
 }
 
 export type Message = Message_NoSensibleData
-export type MessageRaw = Message & {
+export type MessageRaw = Omit<Message, 'sent_at' | 'last_modified' | 'reactions'> & {
 	sent_at: string
 	last_modified: string | null
+	reactions?: MessageReaction[] | null
 }
+
+export const MessageReactionRaw_To_MessageReaction = (reaction: MessageReaction): MessageReaction => ({
+	...reaction,
+	reacted_at: new Date(reaction.reacted_at)
+})
 
 export const MessageRaw_To_Message = (m: MessageRaw): Message => ({
 	...m,
 	sent_at: new Date(m.sent_at ?? ''),
-	last_modified: m.last_modified ? new Date(m.last_modified) : null
+	last_modified: m.last_modified ? new Date(m.last_modified) : null,
+	reactions: (m.reactions ?? []).map(MessageReactionRaw_To_MessageReaction)
 })
-
-export type MessageReaction = {
-	user_id: UUIDv4
-	message_id: number
-	unicode_char: string
-	reacted_at: Date
-}
 
 export type MessageMention = {
 	message_id: number

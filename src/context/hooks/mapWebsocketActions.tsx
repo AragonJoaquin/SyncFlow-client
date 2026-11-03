@@ -1,7 +1,22 @@
 import { WS_ACTIONS } from '@/api'
 import { userStatusFromDto } from '@/constants/userStatus'
-import { useCacheUsersStore, useWorkGroupStore, useOwnUserStore, useClientMessagesStore } from '@/store'
-import type { Category, Channel, ReceivedMessage, UserStatusUpdate, UUIDv4 } from '@/types'
+import {
+	useCacheUsersStore,
+	useWorkGroupStore,
+	useOwnUserStore,
+	useClientMessagesStore,
+	useMessageInteractionStore
+} from '@/store'
+import { REACTION_REQ_KIND, settleReactionRequest } from '@/store/interactions'
+import type {
+	Category,
+	Channel,
+	MessageReactionAdded,
+	MessageReactionRemoved,
+	ReceivedMessage,
+	UserStatusUpdate,
+	UUIDv4
+} from '@/types'
 import { useCallback } from 'react'
 import { useShallow } from 'zustand/shallow'
 
@@ -13,6 +28,8 @@ type function_ws_types =
 	| ((u: UUIDv4) => void)
 	| ((id: number) => void)
 	| ((status: UserStatusUpdate) => void)
+	| ((reaction: MessageReactionAdded) => void)
+	| ((reaction: MessageReactionRemoved) => void)
 
 export function useWebsocketActions() {
 	const {
@@ -60,7 +77,6 @@ export function useWebsocketActions() {
 
 	const removeClientMsg = useClientMessagesStore((s) => s.removeClientMessage)
 
-	//yeah... anu better ideas?
 	const IndexWSActions = useCallback(() => {
 		const MAP_ACTIONS: Record<(typeof WS_ACTIONS)[keyof typeof WS_ACTIONS], function_ws_types> = {
 			[WS_ACTIONS.WS_PUBLISH]: (msg: ReceivedMessage) => {
@@ -80,6 +96,46 @@ export function useWebsocketActions() {
 				const cat = getCategory(id)
 				if (!cat) return
 				deleteChannel(id, cat.id)
+			},
+
+			[WS_ACTIONS.WS_ADD_REACTION]: (reaction: MessageReactionAdded) => {
+				const ownUserId = useOwnUserStore.getState().user?.id
+
+				// The acting client already applied this optimistically; just settle the request.
+				if (reaction.user_id === ownUserId)
+					return settleReactionRequest({
+						messageId: reaction.message_id,
+						userId: reaction.user_id,
+						emoji: reaction.unicode_char
+					})
+
+				useMessageInteractionStore.getState().addMessageReaction({
+					user_id: reaction.user_id,
+					message_id: reaction.message_id,
+					unicode_char: reaction.unicode_char,
+					reacted_at: new Date(reaction.reacted_at)
+				})
+			},
+
+			[WS_ACTIONS.WS_REMOVE_REACTION]: (reaction: MessageReactionRemoved) => {
+				const ownUserId = useOwnUserStore.getState().user?.id
+
+				// The acting client already applied this optimistically; just settle the request.
+				if (reaction.user_id === ownUserId) {
+					settleReactionRequest(
+						{
+							messageId: reaction.message_id,
+							userId: reaction.user_id,
+							emoji: reaction.unicode_char
+						},
+						REACTION_REQ_KIND.REMOVE
+					)
+					return
+				}
+
+				useMessageInteractionStore
+					.getState()
+					.removeMessageReaction(reaction.message_id, reaction.user_id, reaction.unicode_char)
 			},
 
 			[WS_ACTIONS.WS_QUIT_GROUP]: () => removeWGroup(),

@@ -27,3 +27,6 @@ export interface IChatContext {
 
 export const CHAT_CONTEXT = createContext<IChatContext | undefined>(undefined)
 export const useChatContext = () => useAnyContext(CHAT_CONTEXT)
+
+export const CHAT_SOCKET_CONTEXT = createContext<ChatWebSocket | undefined>(undefined)
+export const useChatSocket = () => useAnyContext(CHAT_SOCKET_CONTEXT)

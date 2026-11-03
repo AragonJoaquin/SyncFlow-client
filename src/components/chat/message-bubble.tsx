@@ -4,13 +4,6 @@ import { SVGEdit, SVGPin, SVGReply, SVGSmile, SVGTrash } from '@/components/svgs
 import { useMessageActions } from '@/context/hooks/useMessageActions'
 import { useMessagePermissions } from '@/context/hooks/useMessagePermissions'
 import { CLIENT_OR_SERVER, type client_or_server_message } from '@/context/hooks/useMessagesHistory'
-import {
-	MESSAGE_DIALOG,
-	useMessageInteractionStore,
-	useMessageUiStore,
-	useOwnUserStore,
-	type MessageDialogType
-} from '@/store'
 import { STATUS_MESSAGE, type Message, type MessageReaction, type User } from '@/types'
 import { FormatRelativeTime } from '@/utils'
 import { memo, useEffect, useMemo, useRef } from 'react'
@@ -18,6 +11,8 @@ import { useShallow } from 'zustand/shallow'
 import { FilePreview } from './file-preview'
 import { DeleteMessageDialog, EmojiPickerDialog, PinMessageDialog } from './message-action-dialogs'
 import { MessageReactions } from './message-reactions'
+import { useMessageInteractionStore, useOwnUserStore } from '@/store'
+import { MESSAGE_DIALOG, useMessageUIStore, type MessageDialogType } from '@/store/messageUIStore'
 
 //TODO: make a component for client and server type
 export interface MessageBubbleProps {
@@ -66,7 +61,7 @@ function MessageBubbleComponent({
 		cancelEditing,
 		openDialog,
 		closeDialog
-	} = useMessageUiStore(
+	} = useMessageUIStore(
 		useShallow((s) => ({
 			isEditing: messageId != null && s.editingMessageId === messageId,
 			draft: messageId != null && s.editingMessageId === messageId ? s.editDraft : '',
@@ -121,7 +116,7 @@ function MessageBubbleComponent({
 	const submitEdit = async () => {
 		if (!serverMessage) return
 
-		const current = useMessageUiStore.getState()
+		const current = useMessageUIStore.getState()
 		if (current.isSavingEdit) return
 
 		const nextContent = current.editDraft.trim()
@@ -133,14 +128,14 @@ function MessageBubbleComponent({
 
 		setSavingEdit(true, serverMessage.id)
 		const success = await editMessage(nextContent)
-		const latest = useMessageUiStore.getState()
+		const latest = useMessageUIStore.getState()
 		latest.setSavingEdit(false, serverMessage.id)
 		if (success) latest.finishEditing(serverMessage.id)
 	}
 
 	const handleDelete = async () => {
 		const success = await deleteMessage()
-		if (success && serverMessage) useMessageUiStore.getState().finishEditing(serverMessage.id)
+		if (success && serverMessage) useMessageUIStore.getState().finishEditing(serverMessage.id)
 		return success
 	}
 
@@ -400,7 +395,7 @@ function MessageBubbleComponent({
 	)
 }
 
-function areMessageBubblePropsEqual(prev: MessageBubbleProps, next: MessageBubbleProps) {
+export const MessageBubble = memo(MessageBubbleComponent, (prev: MessageBubbleProps, next: MessageBubbleProps) => {
 	return (
 		prev.message.type === next.message.type &&
 		prev.message.message === next.message.message &&
@@ -413,6 +408,4 @@ function areMessageBubblePropsEqual(prev: MessageBubbleProps, next: MessageBubbl
 		prev.citedMessage === next.citedMessage &&
 		prev.citedSenderName === next.citedSenderName
 	)
-}
-
-export const MessageBubble = memo(MessageBubbleComponent, areMessageBubblePropsEqual)
+})

@@ -1,7 +1,7 @@
 import { SFTipCard } from '@/components'
 import { MessageBubble, type MessageBubbleProps } from '@/components/chat/message-bubble'
 import { SFImage } from '@/components/SFImage'
-import { useCacheUsersStore, useMessageUiStore, useWorkGroupStore } from '@/store'
+import { useCacheUsersStore, useMessageUIStore, useWorkGroupStore } from '@/store'
 import type { Message } from '@/types'
 import { CLIENT_OR_SERVER, useMessagesHistory } from '@/context/hooks/useMessagesHistory'
 import { useEffect, useMemo, useRef } from 'react'
@@ -34,7 +34,7 @@ export function Body() {
 	}, [history])
 
 	useEffect(() => {
-		useMessageUiStore.getState().reset()
+		useMessageUIStore.getState().reset()
 	}, [activeChannelId])
 
 	const groupedMessages = useMemo(() => {

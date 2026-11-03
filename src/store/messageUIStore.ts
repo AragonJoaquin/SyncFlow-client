@@ -13,7 +13,7 @@ type ActiveDialog = {
 	type: MessageDialogType
 }
 
-interface MessageUiStore {
+interface IMessageUIStore {
 	editingMessageId: number | null
 	editDraft: string
 	isSavingEdit: boolean
@@ -36,7 +36,7 @@ const EMPTY_UI_STATE = {
 	activeDialog: null
 } as const
 
-export const useMessageUiStore = create<MessageUiStore>((set, get) => ({
+export const useMessageUIStore = create<IMessageUIStore>((set, get) => ({
 	...EMPTY_UI_STATE,
 
 	startEditing: (messageId, content) =>

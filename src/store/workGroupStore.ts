@@ -12,6 +12,7 @@ import {
 } from '@/types'
 import { create } from 'zustand'
 import { UNDEFINED_ID } from './constants'
+import { useMessageInteractionStore } from './messageInteractionStore'
 import { useCacheUsersStore } from './userStore'
 
 type channel_id = Channel['id']
@@ -94,6 +95,12 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 	//NOTE: wk
 	addWorkGroup: (wk) => {
 		useCacheUsersStore.getState().addMultipleUsers(wk.users)
+
+		const messages = (wk?.category ?? []).flatMap((category) =>
+			(category.channel ?? []).flatMap((channel) => channel.messages ?? [])
+		)
+		useMessageInteractionStore.getState().hydrateMessageReactions(messages)
+
 		set((s) => {
 			const categories = wk?.category ?? []
 			const catMap = new Map<Category['id'], CategoryWithChannels>()
@@ -198,6 +205,9 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 		const category = categories.get(channel.category_id)
 		if (!category) return
 
+		const parsedMessage = MessageRaw_To_Message(message)
+		useMessageInteractionStore.getState().hydrateMessageReactions([parsedMessage])
+
 		// we find the category, then channel, and then we modify it. and we return everything
 		set((s) => ({
 			...s,
@@ -207,7 +217,7 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 					ch.id === channel_id
 						? {
 								...channel,
-								messages: [...(channel?.messages ?? []), MessageRaw_To_Message(message)]
+								messages: [...(channel?.messages ?? []), parsedMessage]
 							}
 						: ch
 				)
@@ -221,6 +231,10 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 
 		const category = get().categories.get(channel.category_id)
 		if (!category) return
+
+		if (patch.reactions) {
+			useMessageInteractionStore.getState().hydrateMessageReactions([{ id: message_id, reactions: patch.reactions }])
+		}
 
 		set((s) => ({
 			...s,
@@ -321,6 +335,8 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 		const currentPagination = get().channelPagination.get(channel_id) ?? { offset: 0, hasMore: true }
 		const newOffset = currentPagination.offset + messages.length
 
+		useMessageInteractionStore.getState().hydrateMessageReactions(messages)
+
 		set((s) => ({
 			...s,
 			fetchedChannels: new Set(s.fetchedChannels).add(channel_id),
@@ -351,6 +367,8 @@ export const useWorkGroupStore = create<WorkGroupStore>((set, get) => ({
 		if (!category) return
 
 		const messages_parsed: Message[] = messages?.map((a) => MessageRaw_To_Message(a))
+
+		useMessageInteractionStore.getState().hydrateMessageReactions(messages_parsed)
 
 		set((s) => ({
 			...s,

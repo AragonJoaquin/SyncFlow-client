@@ -1,10 +1,35 @@
-import { useOwnUserStore, useToastStore } from '@/store'
+import { WS_ACTIONS } from '@/api'
 import { useEffect, useRef } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
 import { useGetWebsocketInstance } from './useGetWebsocketInstance'
 import { ErrorServer } from '@/api/axios_helper'
 import { createUserStatus } from '@/constants/userStatus'
+import { clearPendingReactionRequests, REACTION_REQ_KIND, rollbackReactionRequest } from '@/store/interactions'
+import { useOwnUserStore, useToastStore } from '@/store'
+
+type ReactionEventPayload = {
+	user_id?: unknown
+	message_id?: unknown
+	unicode_char?: unknown
+	reacted_at?: unknown
+}
+
+// The server broadcasts reactions without tagging them with their WS action,
+// so the payload shape is the only reliable way to route them.
+function getReactionAction(data: unknown) {
+	if (!data || typeof data !== 'object') return null
+
+	const payload = data as ReactionEventPayload
+	if (
+		typeof payload.user_id !== 'string' ||
+		typeof payload.message_id !== 'number' ||
+		typeof payload.unicode_char !== 'string'
+	)
+		return null
+
+	return 'reacted_at' in payload ? WS_ACTIONS.WS_ADD_REACTION : WS_ACTIONS.WS_REMOVE_REACTION
+}
 
 export function useWebsocket() {
 	const WS_MAPPED_ACTIONS = useWebsocketActions()
@@ -36,6 +61,7 @@ export function useWebsocket() {
 		socket.onOpen(markUserAsActive)
 
 		socket.onClose((close) => {
+			clearPendingReactionRequests()
 			console.warn('Socket closed: ', close)
 		})
 
@@ -49,14 +75,26 @@ export function useWebsocket() {
 
 		socket.onMessage((ev) => {
 			const res = ev.data
-			if (res.error) return addErrorToast(new ErrorServer({ error_message: res.message }, undefined, 'WEBSOCKET ERROR'))
-			const map_actions = WS_MAPPED_ACTIONS_REF.current()
 
-			const action = ev?.data?.ws_handler
+			if (res.error) {
+				switch (ev.data.ws_handler) {
+					case WS_ACTIONS.WS_ADD_REACTION:
+						rollbackReactionRequest(REACTION_REQ_KIND.ADD)
+						break
+					case WS_ACTIONS.WS_REMOVE_REACTION:
+						rollbackReactionRequest(REACTION_REQ_KIND.REMOVE)
+						break
+				}
+
+				return addErrorToast(new ErrorServer({ error_message: res.message }, undefined, 'WEBSOCKET ERROR'))
+			}
+
+			const map_actions = WS_MAPPED_ACTIONS_REF.current()
+			const action = getReactionAction(res.data) ?? ev.data.ws_handler
 			const func = map_actions[action]
 			if (!func) return
 
-			;(func as (data: unknown) => void)(res?.data)
+			;(func as (data: unknown) => void)(res.data)
 		})
 
 		return () => {

@@ -6,6 +6,7 @@ export * from './Message'
 export * from './PinnedMessage'
 export * from './User'
 export * from './WorkGroup'
+export * from './MessageReaction'
 
 export type UUIDv4 = `${string}-${string}-${string}-${string}`
 export type Email = `${string}@${string}.${'com' | 'org' | 'net' | 'edu' | 'gov'}`

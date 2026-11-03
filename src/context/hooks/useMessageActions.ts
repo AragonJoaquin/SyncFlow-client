@@ -1,4 +1,5 @@
-import { useAxios } from '@/api'
+import { useAxios, WS_ACTIONS } from '@/api'
+import { useChatSocket } from '@/context/chatContext'
 import {
 	useCacheUsersStore,
 	useMessageInteractionStore,
@@ -6,7 +7,8 @@ import {
 	useToastStore,
 	useWorkGroupStore
 } from '@/store'
-import type { Message, MessageRaw, PinnedMessage } from '@/types'
+import { queueReactionRequest, REACTION_REQ_KIND } from '@/store/interactions'
+import type { Message, MessageRaw, MessageReaction, PinnedMessage } from '@/types'
 import { MessageRaw_To_Message } from '@/types'
 import { useCallback } from 'react'
 import { useShallow } from 'zustand/shallow'
@@ -15,6 +17,7 @@ const MAX_MESSAGE_LENGTH = 150
 
 export function useMessageActions(message: Message | null) {
 	const { get, put, post, delete: remove } = useAxios()
+	const socket = useChatSocket()
 
 	const { addSuccessToast } = useToastStore(useShallow((s) => ({ addSuccessToast: s.addSuccessToast })))
 
@@ -27,16 +30,6 @@ export function useMessageActions(message: Message | null) {
 			setPinnedMessages: s.setPinnedMessages
 		}))
 	)
-
-	const { addMessageReaction, removeMessageReaction, clearMessageReactions, clearReplyTarget } =
-		useMessageInteractionStore(
-			useShallow((s) => ({
-				addMessageReaction: s.addMessageReaction,
-				removeMessageReaction: s.removeMessageReaction,
-				clearMessageReactions: s.clearMessageReactions,
-				clearReplyTarget: s.clearReplyTarget
-			}))
-		)
 
 	const refreshPinnedMessages = useCallback(async () => {
 		const groupId = useWorkGroupStore.getState().workGroup?.id
@@ -82,43 +75,68 @@ export function useMessageActions(message: Message | null) {
 		const { data } = await remove<null>(`/channel/${message.channel_id}/messages/${message.id}`)
 		if (data.error) return false
 
+		const interactionStore = useMessageInteractionStore.getState()
 		removeMessage(message.channel_id, message.id)
 		removePinnedMessage(message.id)
-		clearMessageReactions(message.id)
+		interactionStore.clearMessageReactions(message.id)
 
-		const replyTarget = useMessageInteractionStore.getState().replyTarget
-		if (replyTarget?.messageId === message.id) clearReplyTarget()
+		if (interactionStore.replyTarget?.messageId === message.id) interactionStore.clearReplyTarget()
 
-		addSuccessToast('Message deleted')
 		return true
-	}, [addSuccessToast, clearMessageReactions, clearReplyTarget, message, remove, removeMessage, removePinnedMessage])
+	}, [message, remove, removeMessage, removePinnedMessage])
 
 	const toggleReaction = useCallback(
 		async (emoji: string) => {
 			const ownUser = useOwnUserStore.getState().user
 			if (!message || !ownUser) return false
+			if (socket.socket.readyState !== WebSocket.OPEN) return false
 
-			const reactions = useMessageInteractionStore.getState().getMessageReactions(message.id)
-			const hasReacted = reactions.some((r) => r.user_id === ownUser.id && r.unicode_char === emoji)
+			const interactionStore = useMessageInteractionStore.getState()
 
-			const { data } = hasReacted
-				? await remove<null>(`/channel/${message.channel_id}/messages/${message.id}/reactions`, { emoji })
-				: await put<null>(`/channel/${message.channel_id}/messages/${message.id}/reactions`, { emoji })
+			const optimisticReaction: MessageReaction = {
+				user_id: ownUser.id,
+				message_id: message.id,
+				unicode_char: emoji,
+				reacted_at: new Date()
+			} as const
 
-			if (data.error) return false
+			const hasReacted = interactionStore
+				.getMessageReactions(message.id)
+				.some((r) => r.user_id === ownUser.id && r.unicode_char === emoji)
 
-			if (hasReacted) removeMessageReaction(message.id, ownUser.id, emoji)
-			else
-				addMessageReaction({
-					user_id: ownUser.id,
-					message_id: message.id,
-					unicode_char: emoji,
-					reacted_at: new Date()
-				})
+			// Apply the change immediately so the UI never waits on the server.
+			if (hasReacted) interactionStore.removeMessageReaction(message.id, ownUser.id, emoji)
+			else interactionStore.addMessageReaction(optimisticReaction)
+
+			const kind = hasReacted ? REACTION_REQ_KIND.REMOVE : REACTION_REQ_KIND.ADD
+
+			try {
+				socket.sendPayload(
+					kind === REACTION_REQ_KIND.ADD ? WS_ACTIONS.WS_ADD_REACTION : WS_ACTIONS.WS_REMOVE_REACTION,
+					{
+						channel_id: message.channel_id,
+						message_id: message.id,
+						emoji
+					}
+				)
+			} catch {
+				// the request never left the client, so undo the optimistic change.
+				if (kind === REACTION_REQ_KIND.ADD) interactionStore.removeMessageReaction(message.id, ownUser.id, emoji)
+				else interactionStore.addMessageReaction(optimisticReaction)
+				return false
+			}
+
+			queueReactionRequest({
+				kind,
+				messageId: message.id,
+				userId: ownUser.id,
+				emoji,
+				reactedAt: optimisticReaction.reacted_at
+			})
 
 			return true
 		},
-		[addMessageReaction, message, put, remove, removeMessageReaction]
+		[message, socket]
 	)
 
 	const togglePin = useCallback(async () => {
@@ -132,10 +150,14 @@ export function useMessageActions(message: Message | null) {
 
 		if (data.error) return false
 
-		if (isPinned) {
-			removePinnedMessage(message.id)
-			addSuccessToast('Message unpinned')
-		} else {
+		//this just saves like 4 lines
+		const togglePinCb = () => {
+			if (isPinned) {
+				removePinnedMessage(message.id)
+				addSuccessToast('Message unpinned')
+				return
+			}
+
 			const channel = useWorkGroupStore.getState().getChannel(message.channel_id)
 			const sender = useCacheUsersStore.getState().getUser(message.sender_id)?.user
 
@@ -152,6 +174,8 @@ export function useMessageActions(message: Message | null) {
 			addSuccessToast('Message pinned')
 		}
 
+		//remember to call it lol
+		togglePinCb()
 		await refreshPinnedMessages()
 		return true
 	}, [addPinnedMessage, addSuccessToast, message, post, refreshPinnedMessages, remove, removePinnedMessage])
