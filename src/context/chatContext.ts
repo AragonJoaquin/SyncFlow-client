@@ -20,6 +20,10 @@ export interface IChatContext {
 	websocket: {
 		CHAT_SOCKET: ChatWebSocket
 		isConnected: boolean
+		isReconnecting: boolean
+		reconnectAttempt: number
+		hasConnected: boolean
+		reconnectNow: () => void
 	}
 
 	loadMoreMessages: (channel_id: Channel['id']) => Promise<void>

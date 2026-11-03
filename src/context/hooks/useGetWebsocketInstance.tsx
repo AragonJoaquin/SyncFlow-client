@@ -7,6 +7,15 @@ interface get_websocket_instance {
 	isConnected: boolean
 }
 
+// useSyncExternalStore requires the fallback snapshot to keep the same identity
+// between reads, otherwise it treats every read as a state change.
+const DISCONNECTED_SNAPSHOT = {
+	readyState: WebSocket.CLOSED,
+	isReconnecting: false,
+	reconnectAttempt: 0,
+	hasConnected: false
+} as const
+
 export function useGetWebsocketInstance(isLogged: boolean): get_websocket_instance {
 	const chatWS = useMemo(() => {
 		if (!isLogged) return null
@@ -24,15 +33,12 @@ export function useGetWebsocketInstance(isLogged: boolean): get_websocket_instan
 		[chatWS]
 	)
 
-	const getSnapshot = useMemo(() => (chatWS ? chatWS.getSnapshot : () => WebSocket.CLOSED), [chatWS])
-
-	const getServerSnapshot = useMemo(() => (chatWS ? chatWS.getSnapshot : () => WebSocket.CLOSED), [chatWS])
-
-	const readyState = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+	const getSnapshot = useMemo(() => (chatWS ? chatWS.getSnapshot : () => DISCONNECTED_SNAPSHOT), [chatWS])
+	const connection = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 
 	return {
 		chatWS,
-		readyState,
-		isConnected: chatWS != null && readyState === WebSocket.OPEN
+		readyState: connection.readyState,
+		isConnected: chatWS != null && connection.readyState === WebSocket.OPEN
 	}
 }

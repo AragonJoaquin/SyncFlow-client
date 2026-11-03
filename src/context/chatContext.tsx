@@ -25,8 +25,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	}, [])
 
 	const socket = useWebsocket()
-	const socketReadyState = useSocketConnectionState(socket)
-	const isSocketConnected = socketReadyState === WebSocket.OPEN
+	const socketConnection = useSocketConnectionState(socket)
+	const isSocketConnected = socketConnection.readyState === WebSocket.OPEN
 
 	const loadMoreMessages = useCallback(
 		async (channel_id: Channel['id']) => {
@@ -58,7 +58,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 					},
 					websocket: {
 						CHAT_SOCKET: socket,
-						isConnected: isSocketConnected
+						isConnected: isSocketConnected,
+						isReconnecting: socketConnection.isReconnecting,
+						reconnectAttempt: socketConnection.reconnectAttempt,
+						hasConnected: socketConnection.hasConnected,
+						reconnectNow: socket.reconnectNow
 					},
 					loadMoreMessages
 				}}

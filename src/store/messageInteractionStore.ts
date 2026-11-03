@@ -4,6 +4,10 @@ import { areReactionsEqual, type ReplyTarget } from './interactions'
 
 type HydratableMessage = Pick<Message, 'id' | 'reactions'>
 
+// A stable reference is required by useSyncExternalStore. Returning a fresh
+// empty array makes React think the snapshot changed on every read.
+const EMPTY_REACTIONS: MessageReaction[] = []
+
 interface MessageInteractionStore {
 	replyTarget: ReplyTarget | null
 	setReplyTarget: (target: ReplyTarget) => void
@@ -24,7 +28,7 @@ export const useMessageInteractionStore = create<MessageInteractionStore>((set, 
 
 	reactions: new Map<number, MessageReaction[]>(),
 
-	getMessageReactions: (messageId) => get().reactions.get(messageId) ?? [],
+	getMessageReactions: (messageId) => get().reactions.get(messageId) ?? EMPTY_REACTIONS,
 
 	hydrateMessageReactions: (messages) =>
 		set((s) => {

@@ -1,5 +1,6 @@
 export * from './SFAvatar'
 export * from './SFButton'
+export * from './SFConnectionBanner'
 export * from './SFDialog'
 export * from './SFDropDown'
 export * from './SFGroupCard'

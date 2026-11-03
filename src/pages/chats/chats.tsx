@@ -4,7 +4,7 @@ import { useWorkGroupStore } from '@/store'
 import type { FullWorkGroup } from '@/types'
 import { useEffect, useState } from 'react'
 import { useShallow } from 'zustand/shallow'
-import { SFSkeleton } from '@/components'
+import { SFConnectionBanner, SFSkeleton } from '@/components'
 import { AsideBar, Body, FooterChat, Header } from './components'
 import { MainMenuNoGroup } from './components/bodyComp'
 import { AsideBarProvider } from './components/context'
@@ -60,6 +60,8 @@ export function ChatPage() {
 
 	return (
 		<section className="flex flex-row w-full h-full max-h-screen overflow-hidden">
+			<SFConnectionBanner />
+
 			<AsideBarProvider>
 				<AsideBar />
 			</AsideBarProvider>

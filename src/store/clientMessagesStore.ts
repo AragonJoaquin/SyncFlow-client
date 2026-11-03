@@ -5,6 +5,10 @@ import { useOwnUserStore } from './userStore'
 type channel_id = Channel['id']
 type client_message = Omit<ClientMessageQueueItem, 'status' | 'sent_at' | 'channel_id' | 'sender_id'>
 
+// A stable reference is required by useSyncExternalStore. Returning a fresh
+// empty array makes React think the snapshot changed on every read.
+const EMPTY_CLIENT_MESSAGES: ClientMessageQueueItem[] = []
+
 interface ClientMessagesStore {
 	clientMessages: Map<channel_id, ClientMessageQueueItem[]>
 	addClientMessage: (channelId: channel_id, message: client_message) => void
@@ -49,5 +53,5 @@ export const useClientMessagesStore = create<ClientMessagesStore>((set, get) => 
 		})
 	},
 
-	getClientMessages: (channelId) => get().clientMessages.get(channelId) ?? []
+	getClientMessages: (channelId) => get().clientMessages.get(channelId) ?? EMPTY_CLIENT_MESSAGES
 }))

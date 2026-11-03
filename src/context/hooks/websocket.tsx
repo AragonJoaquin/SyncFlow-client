@@ -4,7 +4,7 @@ import { useShallow } from 'zustand/shallow'
 import { useWebsocketActions } from './mapWebsocketActions'
 import { useGetWebsocketInstance } from './useGetWebsocketInstance'
 import { ErrorServer } from '@/api/axios_helper'
-import { createUserStatus } from '@/constants/userStatus'
+import { createUserStatus, USER_STATUS_KEYS } from '@/constants/userStatus'
 import { clearPendingReactionRequests, REACTION_REQ_KIND, rollbackReactionRequest } from '@/store/interactions'
 import { useOwnUserStore, useToastStore } from '@/store'
 
@@ -36,9 +36,10 @@ export function useWebsocket() {
 	const WS_MAPPED_ACTIONS_REF = useRef(WS_MAPPED_ACTIONS)
 	WS_MAPPED_ACTIONS_REF.current = WS_MAPPED_ACTIONS
 
-	const { addErrorToast } = useToastStore(
+	const { addErrorToast, addSuccessToast } = useToastStore(
 		useShallow((s) => ({
-			addErrorToast: s.addErrorToast
+			addErrorToast: s.addErrorToast,
+			addSuccessToast: s.addSuccessToast
 		}))
 	)
 
@@ -50,15 +51,25 @@ export function useWebsocket() {
 	)
 
 	const { chatWS: socket } = useGetWebsocketInstance(!!user)
+	const hasConnectedRef = useRef(false)
 
 	useEffect(() => {
 		if (!socket) return
 
-		// The server marks the user as active when the socket connects.
-		// Keep the local profile in sync even when the user is not in a group.
-		const markUserAsActive = () => setUserStatus(createUserStatus('active'))
-		if (socket.socket.readyState === WebSocket.OPEN) markUserAsActive()
-		socket.onOpen(markUserAsActive)
+		const markUserAsActive = () => setUserStatus(createUserStatus(USER_STATUS_KEYS.ACTIVE))
+
+		if (socket.socket.readyState === WebSocket.OPEN) {
+			hasConnectedRef.current = true
+			markUserAsActive()
+		}
+
+		socket.onOpen(() => {
+			const wasReconnect = hasConnectedRef.current
+			hasConnectedRef.current = true
+
+			markUserAsActive()
+			if (wasReconnect) addSuccessToast('Reconnected to SyncFlow')
+		})
 
 		socket.onClose((close) => {
 			clearPendingReactionRequests()
@@ -66,11 +77,9 @@ export function useWebsocket() {
 		})
 
 		socket.onError((err) => {
+			// The connection banner reports disconnects. Avoid stacking a toast
+			// for every reconnect attempt while the socket is down.
 			console.warn("Socket error'ed:", err)
-			addErrorToast({
-				title: "Couldn't connect to the ws",
-				description: "Its possible the rest of the application won't work from now on. Reloading can be helpful."
-			})
 		})
 
 		socket.onMessage((ev) => {
@@ -97,10 +106,15 @@ export function useWebsocket() {
 			;(func as (data: unknown) => void)(res.data)
 		})
 
+		// skip the backoff as soon as the browser reports network access again.
+		const handleOnline = () => socket.reconnectNow()
+		window.addEventListener('online', handleOnline)
+
 		return () => {
+			window.removeEventListener('online', handleOnline)
 			socket.closeConnection()
 		}
-	}, [socket, addErrorToast, setUserStatus])
+	}, [socket, addErrorToast, addSuccessToast, setUserStatus])
 
 	return socket!
 }
