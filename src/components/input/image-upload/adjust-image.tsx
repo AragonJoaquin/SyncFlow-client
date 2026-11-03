@@ -61,12 +61,14 @@ export function AdjustImage({ fieldName }: AdjustImageProps) {
 						<SVGTrash className="w-4 h-4" />
 					</button>
 
-					<img
-						src={preview}
-						alt="Preview"
-						className={`size-full object-cover rounded-md cursor-pointer aspect-square transition-opacity hover:opacity-80 ${isModalOpen && 'pointer-events-none'}`}
+					<button
+						type="button"
 						onClick={() => setIsModalOpen(true)}
-					/>
+						aria-label="Adjust image preview"
+						className={`block size-full overflow-hidden rounded-md cursor-pointer aspect-square transition-opacity hover:opacity-80 ${isModalOpen ? 'pointer-events-none' : ''}`}
+					>
+						<img src={preview} alt="" className="size-full object-cover rounded-md aspect-square" />
+					</button>
 				</span>
 			)}
 

@@ -43,9 +43,16 @@ type formData = z.infer<typeof schema>
 export function FooterChat() {
 	const [imageName, setImageName] = useState<string>()
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+	const [attachedPreviewUrl, setAttachedPreviewUrl] = useState<string | null>(null)
 	const [showUploadModal, setShowUploadModal] = useState(false)
 
 	const fileInputRef = useRef<HTMLInputElement>(null)
+
+	useEffect(() => {
+		if (!attachedPreviewUrl) return
+
+		return () => URL.revokeObjectURL(attachedPreviewUrl)
+	}, [attachedPreviewUrl])
 
 	const { activeChannel } = useWorkGroupStore(useShallow((s) => ({ activeChannel: s.activeChannel })))
 	const user = useOwnUserStore(useShallow((s) => s.user))
@@ -89,9 +96,9 @@ export function FooterChat() {
 
 	const removeAttachedImage = () => {
 		setValue(FIELD_NAMES.FILE, null)
-		if (previewUrl) URL.revokeObjectURL(previewUrl)
 
 		setPreviewUrl(null)
+		setAttachedPreviewUrl(null)
 		setImageName(undefined)
 		setShowUploadModal(false)
 		if (fileInputRef.current) fileInputRef.current.value = ''
@@ -172,9 +179,11 @@ export function FooterChat() {
 									const file = watchedFile instanceof FileList ? watchedFile[0] : watchedFile
 									if (!file) return
 
-									if (previewUrl) URL.revokeObjectURL(previewUrl)
 									setImageName(file.name ?? 'Image attached')
-									setPreviewUrl(URL.createObjectURL(file))
+
+									const objectUrl = URL.createObjectURL(file)
+									setAttachedPreviewUrl(objectUrl)
+									setPreviewUrl(objectUrl)
 									setShowUploadModal(false)
 								}}
 								className="w-full bg-primary hover:bg-primary-hover text-primary-foreground py-2 rounded-md font-medium text-sm transition-colors"

@@ -34,7 +34,10 @@ function getReactionAction(data: unknown) {
 export function useWebsocket() {
 	const WS_MAPPED_ACTIONS = useWebsocketActions()
 	const WS_MAPPED_ACTIONS_REF = useRef(WS_MAPPED_ACTIONS)
-	WS_MAPPED_ACTIONS_REF.current = WS_MAPPED_ACTIONS
+
+	useEffect(() => {
+		WS_MAPPED_ACTIONS_REF.current = WS_MAPPED_ACTIONS
+	}, [WS_MAPPED_ACTIONS])
 
 	const { addErrorToast, addSuccessToast } = useToastStore(
 		useShallow((s) => ({

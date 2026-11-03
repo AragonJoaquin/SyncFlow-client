@@ -32,7 +32,7 @@ export function PannelWrapper({
 	const isOpen = activePanel === panelType
 
 	return (
-		<div
+		<dialog
 			aria-label={panelName}
 			aria-modal="true"
 			className={`fixed inset-0 transition-opacity duration-300 z-[999] pointer-events-none ${isOpen ? 'visible opacity-100 pointer-events-auto' : 'invisible opacity-0'}`}
@@ -75,6 +75,6 @@ export function PannelWrapper({
 
 				<main className={`flex-1 overflow-y-auto px-3 pb-3 ${className}`}>{children}</main>
 			</aside>
-		</div>
+		</dialog>
 	)
 }

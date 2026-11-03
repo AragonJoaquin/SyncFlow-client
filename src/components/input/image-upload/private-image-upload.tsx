@@ -91,12 +91,14 @@ export const PrivateImageUploader = ({ fieldName, label, enableCrop = false }: I
 				) : enableCrop ? (
 					<AdjustImage {...{ fieldName }} />
 				) : (
-					<img
-						src={preview}
-						alt="Preview"
-						className="size-full object-cover rounded-md cursor-pointer aspect-square"
+					<button
+						type="button"
 						onClick={() => setPreview(undefined)}
-					/>
+						aria-label="Clear selected image"
+						className="block size-full overflow-hidden rounded-md cursor-pointer aspect-square"
+					>
+						<img src={preview} alt="" className="size-full object-cover rounded-md aspect-square" />
+					</button>
 				)}
 			</div>
 			<span className="mt-1 flex text-center w-full justify-center items-baseline">
