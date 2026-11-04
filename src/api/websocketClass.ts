@@ -204,7 +204,7 @@ export class ChatWebSocket {
 
 	// used when the browser comes back online or when
 	// the user asks to retry from the disconnected banner.
-	reconnectNow() {
+	reconnectNow = () => {
 		if (this.manuallyClosed) return
 		if (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING) return
 
@@ -267,7 +267,7 @@ export class ChatWebSocket {
 		(this.handlers.message = f as (ev: MessageEvent) => void)
 
 	//WARN: store subscription API react
-	subscribe(listener: () => void) {
+	subscribe = (listener: () => void) => {
 		this.listeners.add(listener)
 		return () => this.listeners.delete(listener)
 	}
