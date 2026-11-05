@@ -69,7 +69,7 @@ function MessageBubbleComponent({
 			{serverMessage && <MessageActionBar serverMessage={serverMessage} sender={sender} />}
 
 			{showAvatar && (
-				<span className="w-[40px] flex-shrink-0">
+				<span className="shrink-0">
 					<SFAvatarImage src={sender?.profile_picture} username={sender?.alias_name} size="big" />
 				</span>
 			)}

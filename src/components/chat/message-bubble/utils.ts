@@ -33,4 +33,4 @@ export const getSelectedEmojis = (reactions: MessageReaction[], ownUserId: User[
 		: reactions.filter((reaction) => reaction.user_id === ownUserId).map((reaction) => reaction.unicode_char)
 
 export const getMessageRowClassName = (showAvatar: boolean, isPending: boolean, isError: boolean) =>
-	`group relative flex gap-3 px-2 py-0.5 hover:bg-neutral-800/30 -mx-2 rounded ${!showAvatar ? 'pl-[42px]' : ''} ${isPending ? 'opacity-60' : ''} ${isError ? 'bg-red-500/10' : ''}`
+	`group relative flex gap-3 px-2 py-0.5 hover:bg-neutral-800/30 -mx-2 rounded ${!showAvatar ? 'pl-[76px]' : ''} ${isPending ? 'opacity-60' : ''} ${isError ? 'bg-red-500/10' : ''}`

@@ -24,6 +24,23 @@ export const debouncer = <T extends unknown[]>(callback: (...args: T) => void, d
 
 export const BASE_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api'
 export const CLIENT_VER: string = import.meta.env.VITE_CLIENT_VER ?? '???'
+export const S3_PUBLIC_CDN: string = import.meta.env.VITE_S3_PUBLIC_CDN ?? ''
+export const S3_REGION: string = import.meta.env.VITE_AWS_REGION ?? 'us-east-1'
+
+type PublicFile = { filename?: string | null } | string | null | undefined
+
+export const getPublicFileUrl = (file: PublicFile): string | undefined => {
+	const filename = typeof file === 'string' ? file : file?.filename
+	if (!filename) return undefined
+	if (filename.startsWith('http://') || filename.startsWith('https://')) return filename
+
+	const encodedPath = filename
+		.split('/')
+		.map((part) => encodeURIComponent(part))
+		.join('/')
+
+	return `${S3_PUBLIC_CDN}${encodedPath}`
+}
 
 export const INVALID_DATE = '0001-01-01T00:00:00Z' as const
 

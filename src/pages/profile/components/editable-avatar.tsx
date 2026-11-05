@@ -1,12 +1,11 @@
 import { useAxios } from '@/api'
-import { SFButton, SFDialog } from '@/components'
+import { SFButton, SFDialog, SFAvatarImage } from '@/components'
 import { ImageUploader } from '@/components/input'
-import { SFSkeleton } from '@/components/SFSkeleton'
 import { SVGEdit } from '@/components/svgs'
 import { useOwnUserStore, useToastStore } from '@/store'
-import type { User } from '@/types'
+import type { FileRepo, User } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form, Avatar } from 'radix-ui'
+import { Form } from 'radix-ui'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -35,7 +34,7 @@ type AvatarFormType = z.infer<typeof zodSchema>
 
 export function EditableAvatar({ user, onAvatarUpdate }: EditableAvatarProps) {
 	const [isLoading, setIsLoading] = useState(false)
-	const { patch, post } = useAxios()
+	const { post, put } = useAxios()
 	const { setUser } = useOwnUserStore()
 	const { addSuccessToast } = useToastStore()
 
@@ -51,21 +50,20 @@ export function EditableAvatar({ user, onAvatarUpdate }: EditableAvatarProps) {
 
 		setIsLoading(true)
 
-		//TODO: this is HORRIBLE and BUGGY
 		try {
 			const formData = new FormData()
-			formData.append('file', file)
+			formData.append('upload_image', file)
 
-			const { data: res } = await post<{ url: string }>('/upload/public', formData)
-			if (res.error) return
+			const { data: uploadResponse } = await post<FileRepo>('/upload/public', formData)
+			if (uploadResponse.error) return
 
-			const updateResponse = await patch<User>('/user', { profile_picture: res.data.url })
+			const { data: updateResponse } = await put<User>('/user', {
+				profile_picture_id: uploadResponse.data.id
+			})
+			if (updateResponse.error) return
 
-			const updUsr = updateResponse.data
-			if (updUsr.error) return
-
-			setUser(updUsr.data)
-			onAvatarUpdate(updUsr.data)
+			setUser(updateResponse.data)
+			onAvatarUpdate(updateResponse.data)
 			addSuccessToast('Profile picture updated successfully')
 			methods.reset()
 		} finally {
@@ -76,8 +74,6 @@ export function EditableAvatar({ user, onAvatarUpdate }: EditableAvatarProps) {
 	const handleCancel = () => {
 		methods.reset()
 	}
-
-	const avatar_name = user.name != null ? `${user.name}'s avatar` : 'Unknown avatar'
 
 	return (
 		<div className="relative group">
@@ -91,17 +87,7 @@ export function EditableAvatar({ user, onAvatarUpdate }: EditableAvatarProps) {
 						type="button"
 						aria-label="Edit profile picture"
 					>
-						<Avatar.Root>
-							<Avatar.Image
-								src={user.profile_picture?.id}
-								alt={avatar_name}
-								title={avatar_name}
-								className="w-64 h-64 rounded-full"
-							/>
-							<Avatar.Fallback className="text-1xl">
-								<SFSkeleton variant="circle" width={52} height={52} />
-							</Avatar.Fallback>
-						</Avatar.Root>
+						<SFAvatarImage src={user.profile_picture} username={user.name} size="profile" />
 
 						{/* Edit Overlay */}
 						<div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">

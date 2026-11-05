@@ -15,5 +15,5 @@ export function MessageContent({ serverMessage, content, onSave }: MessageConten
 		return <MessageEditForm serverMessage={serverMessage} onSave={onSave} />
 	}
 
-	return <p className="text-[#dcddde] text-[0.9375rem] whitespace-pre-wrap wrap-break-words">{content}</p>
+	return <p className="text-[#dcddde] text-[0.95rem] whitespace-pre-wrap wrap-break-words">{content}</p>
 }

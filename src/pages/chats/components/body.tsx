@@ -73,7 +73,7 @@ export function Body() {
 
 	return (
 		<article ref={containerRef} className="flex-1 overflow-y-auto h-full">
-			<section className={`font-Cabin flex flex-col grow h-full gap-4 p-3`}>
+			<section className={`font-Cabin flex flex-col grow h-full gap-2 p-2`}>
 				{activeChannelId ? (
 					history.length > 0 &&
 					groupedMessages.map(({ message: msg, showAvatar, sender, citedMessage, citedSenderName }) => {
